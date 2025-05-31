@@ -21,6 +21,11 @@ namespace EARS
 			virtual bool CheckTransition(uint32_t SimTime, float FrameTime, uint32_t TransID, void* TransData) override;
 			virtual void InitialiseChild(StateMachine* ChildMachine) override;
 			//~ End  EARS::Modules::PlayerSM interface
+
+		private:
+
+			/** not part of game, this is for SDK */
+			void UpdateFlyMode();
 		};
 
 		static_assert(sizeof(PlayerMasterSM) == 0x74);

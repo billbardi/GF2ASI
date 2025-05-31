@@ -29,7 +29,7 @@ uint16_t Flags16::GetAllFlags() const
 
 void Flags16::Set(const uint16_t Flag)
 {
-	m_Flags | Flag;
+	m_Flags |= Flag;
 }
 
 void Flags16::Set(const uint16_t Flag, bool bNewValue)

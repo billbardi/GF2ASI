@@ -37,6 +37,8 @@
 #include "SDK/EARS_Godfather/Modules/Vehicles/VehicleDamageComponent.h"
 #include "SDK/EARS_Physics/Characters/CharacterProxy.h"
 
+#include "SDK/EARS_RT_LLRender/include/ShaderManager.h"
+
 // CPP
 #include <iostream>
 #include <fstream>
@@ -48,10 +50,10 @@
 
 #if DEBUG
 #define SHOW_DEMOGRAPHICS_TAB 0
-#define SHOW_FAMILY_TAB 0
+#define SHOW_FAMILY_TAB 1
 #else
 #define SHOW_DEMOGRAPHICS_TAB 0
-#define SHOW_FAMILY_TAB 0
+#define SHOW_FAMILY_TAB 1
 #endif // DEBUG
 
 #if ENABLE_ENTITY_SPAWN_DEBUG
@@ -184,39 +186,6 @@ void ImGuiManager::DrawTab_PlayerSettings()
 {
 	if (ImGui::BeginTabItem("Player", nullptr, ImGuiTabItemFlags_None))
 	{
-		/* DEBUG - MOVE TO DIFFERENT PLACE IF VENTURE INTO RENDERING
-		if(ImGui::Button("Dump Shaders"))
-		{
-			struct SM_Shader_Base
-			{
-				virtual ~SM_Shader_Base() = 0;
-
-				virtual const char* GetName() = 0;
-
-				SM_Shader_Base* pNext;
-				unsigned int lowerNameHash;
-				unsigned int shaderNumber;
-				unsigned int vsHandle;
-				unsigned int psHandle;
-			};
-
-			hook::Type<SM_Shader_Base*> ShaderList = hook::Type<SM_Shader_Base*>(0x12058EC);
-
-			std::ofstream myfile;
-			myfile.open("example.txt");
-
-			SM_Shader_Base* CurrentShader = ShaderList.get();
-			while(CurrentShader != nullptr)
-			{
-				const char* Name = CurrentShader->GetName();
-				CurrentShader = CurrentShader->pNext;
-
-				myfile << "CalculateHashAndAdd(\"" << Name << "\");" << std::endl;
-			}
-
-			myfile.close();
-		} */
-
 		if (EARS::Modules::Player* LocalPlayer = EARS::Modules::Player::GetLocalPlayer())
 		{
 			if (ImGui::Button("Inspect Player"))
@@ -511,24 +480,82 @@ void ImGuiManager::DrawTab_FamiliesSettings()
 	if (ImGui::BeginTabItem("Families", nullptr, ImGuiTabItemFlags_None))
 	{
 		ImGui::BeginChild("family_contents");
-		if (ImGui::TreeNode("Registered Families"))
+
+		const char* Preview = "<select_family>";
+		if (TargetFamily)
 		{
-			FamilyMgr->ForEachFamily([&](EARS::Modules::Family& InFamily) {
-				if (ImGui::TreeNodeEx((void*)InFamily.GetFamilyID(), ImGuiTreeNodeFlags_DefaultOpen, "%s", InFamily.GetInternalName()->c_str()))
-				{
-					for (uint32_t i = 0; i < InFamily.GetNumMadeMen(); i++)
-					{
-						const EARS::Modules::MadeMan* CurMadeMan = InFamily.GetMadeManByIndex(i);
-						const String* Name = CurMadeMan->GetSimNPC()->GetName();
-						ImGui::BulletText("CurMadeMan: %s -> %u", Name->c_str(), CurMadeMan->GetState());
-					}
-
-					ImGui::TreePop();
-				}
-				});
-
-			ImGui::TreePop();
+			Preview = TargetFamily->GetInternalName()->c_str();
 		}
+
+		ImGui::PushItemWidth(-1.0f);
+		if(ImGui::BeginCombo("###select_family", Preview))
+		{
+			FamilyMgr->ForEachStrategyFamily([&](EARS::Modules::Family& InFamily) 
+			{
+				const char* FamilyName = InFamily.GetInternalName()->c_str();
+				bool bSelected = (TargetFamily == &InFamily);
+				if(ImGui::Selectable(FamilyName, &bSelected))
+				{
+					TargetFamily = &InFamily;
+				}
+			});
+
+			ImGui::EndCombo();
+		}
+		ImGui::PopItemWidth();
+
+		if (TargetFamily)
+		{
+			if (ImGui::CollapsingHeader("Strategy Game", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				float MinTurnInterval = TargetFamily->GetMinTurnInterval();
+				if (ImGui::InputFloat("Min Turn Interval", &MinTurnInterval))
+				{
+					TargetFamily->SetMinTurnInterval(MinTurnInterval);
+				}
+
+				float MaxTurnInterval = TargetFamily->GetMaxTurnInterval();
+				if (ImGui::InputFloat("Max Turn Interval", &MaxTurnInterval))
+				{
+					TargetFamily->SetMaxTurnInterval(MaxTurnInterval);
+				}
+
+				float ResponseDelay = TargetFamily->GetResponseDelay();
+				if (ImGui::InputFloat("Response Delay", &ResponseDelay))
+				{
+					TargetFamily->SetResponseDelay(ResponseDelay);
+				}
+
+				/*const uint32_t FamilyAlly1 = TargetFamily->GetAllyFamilyID(1);
+				ImGui::Text("Ally 1: %u", FamilyAlly1);
+				const uint32_t FamilyAlly2 = TargetFamily->GetAllyFamilyID(2);
+				ImGui::Text("Ally 2: %u", FamilyAlly2);
+				const uint32_t FamilyAlly3 = TargetFamily->GetAllyFamilyID(3);
+				ImGui::Text("Ally 3: %u", FamilyAlly3);*/
+			}
+
+			if (ImGui::CollapsingHeader("Made Men", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				for (uint32_t i = 0; i < TargetFamily->GetNumMadeMen(); i++)
+				{
+					const EARS::Modules::MadeMan* CurMadeMan = TargetFamily->GetMadeManByIndex(i);
+					const String* Name = CurMadeMan->GetSimNPC()->GetName();
+					ImGui::BulletText("CurMadeMan: %s -> %u", Name->c_str(), CurMadeMan->GetState());
+				}
+			}
+
+			if (ImGui::CollapsingHeader("Omerta Table", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				TargetFamily->ForEachOmertaTable([&](EARS::Modules::Family::OmertaEntry& OmertaEntry)
+					{
+						const EARS::Modules::Family* TargetFamily = FamilyMgr->GetFamily(OmertaEntry.m_FamilyID);
+						const char* FamilyName = TargetFamily->GetInternalName()->c_str();
+
+						ImGui::InputFloat(FamilyName, &OmertaEntry.m_Omerta);
+					});
+			}
+		}
+
 		ImGui::EndChild();
 
 		ImGui::EndTabItem();

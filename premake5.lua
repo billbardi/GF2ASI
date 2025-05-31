@@ -19,6 +19,7 @@ project "GF2ASI"
    "$(ProjectDir)" ,
    "$(ProjectDir)Source",
    "$(ProjectDir)Source/Packages",
+   "vendors/d3d9/include",
    "vendors/detours",
    "vendors/polyhook/include",
    "vendors/libcurl/include",
@@ -28,10 +29,12 @@ project "GF2ASI"
 
    libdirs {
    "vendors/detours",
+   "vendors/d3d9/libs",
    }
 
    links {
    "detours.lib",
+   "d3d9.lib",
    }
    
    -- rc and aps is for icon
@@ -51,7 +54,8 @@ project "GF2ASI"
 	  "vendors/polyhook/libs/debug/Zydis.lib",
 	  "vendors/discord/libs/discord_game_sdk.dll.lib",
 	  "vendors/libcurl/debug/libcurl-d.lib",
-          "vendors/lua/libs/lua_debug.lib"
+          "vendors/lua/libs/lua_debug.lib",
+          "d3dx9d.lib",
       }
 
    filter "configurations:Release"
@@ -67,5 +71,6 @@ project "GF2ASI"
 	  "vendors/polyhook/libs/release/Zydis.lib",
 	  "vendors/discord/libs/discord_game_sdk.dll.lib",
 	  "vendors/libcurl/release/libcurl.lib",
-          "vendors/lua/libs/lua_release.lib"
+          "vendors/lua/libs/lua_release.lib",
+          "d3dx9.lib"
       }

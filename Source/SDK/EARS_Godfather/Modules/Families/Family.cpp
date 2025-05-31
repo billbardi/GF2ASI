@@ -30,6 +30,14 @@ EARS::Modules::MadeMan* EARS::Modules::Family::GetMadeManByIndex(const uint32_t 
 	return m_MadeMen[Index];
 }
 
+void EARS::Modules::Family::ForEachOmertaTable(const TVisitOmertaEntryFunctor& InFunction)
+{
+	for (OmertaEntry& Entry : m_OmertaTable)
+	{
+		InFunction(Entry);
+	}
+}
+
 const String* EARS::Modules::Family::GetInternalName() const
 {
 	if (m_InternalName)

@@ -10,7 +10,7 @@
 #include <polyhook2/ZydisDisassembler.hpp>
 
 #define RUN_MASTER_SM_IN_ASI 1
-#define IMPLEMENT_DEBUG_FLY_SM 1
+#define IMPLEMENT_DEBUG_FLY_SM 0
 
 EARS::StateMachineSys::StateMachine* S_PlayerMasterSM_FactoryFn(unsigned int id, EARS::StateMachineSys::StateMachineParams* pSMParams)
 {
@@ -44,6 +44,10 @@ void _cdecl HOOK_PlayerMasterSM_BuildStateMachine()
 	StartState->AddChild("playerCameraStateTable", true);
 	StartState->AddChild("playerF2FStateTable", true);
 
+	// Fly mode update
+	StartState->AddUpdateMessage(0x255);
+
+#if IMPLEMENT_DEBUG_FLY_SM
 	// TRANSITIONS TO DEBUG STATE ADDED FOR MOD
 	StartState->AddTransition("debugFly", 0x11);
 	StartState->AddExitMessage(0x31);
@@ -52,6 +56,7 @@ void _cdecl HOOK_PlayerMasterSM_BuildStateMachine()
 	EARS::Framework::SMBuilderState* DebugFlyState = Builder.AddState("debugFly", -1);
 	DebugFlyState->AddChild("playerDebugFlyStateTable", false);
 	DebugFlyState->AddTransition("start", 1);
+#endif // IMPLEMENT_DEBUG_FLY_SM
 
 	Builder.CompileAndRegister(0xB08AE1F6, S_PlayerMasterSM_FactoryFn, "PlayerMasterSM");
 

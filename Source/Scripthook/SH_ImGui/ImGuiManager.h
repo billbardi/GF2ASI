@@ -17,6 +17,11 @@
 // Forward declarations
 namespace EARS
 {
+	namespace Modules
+	{
+		class Family;
+	}
+
 	namespace Vehicles
 	{
 		class WhiteboxCar;
@@ -108,4 +113,6 @@ private:
 
 	std::string InventoryAddItem_SelectedName;
 	EARS::Common::guid128_t InventoryAddItem_SelectedGuid;
+
+	EARS::Modules::Family* TargetFamily = nullptr;
 };

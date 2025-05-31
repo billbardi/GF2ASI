@@ -25,7 +25,7 @@ RWS::CEventHandler::CEventHandler()
 RWS::CEventHandler::~CEventHandler()
 {
 	// TODO: This should match engine code
-	MemUtils::CallClassMethod<void, RWS::CEventHandler*>(0x8517B230, this);
+	MemUtils::CallClassMethod<void, RWS::CEventHandler*>(0x04083D0, this);
 }
 
 void RWS::CEventHandler::DisableMessages()

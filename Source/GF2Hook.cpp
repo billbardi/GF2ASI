@@ -28,7 +28,7 @@
 #define ENABLE_GF2_MULTIPLAYER 0
 #define ENABLE_GF2_DISPL_BEGINSCENE_HOOK 0
 #define ENABLE_GF2_GODFATHER_SERVICES_TICK_HOOK 0
-#define ENABLE_GF2_SPAWN_ENTITY_HOOKS 0
+#define ENABLE_GF2_SPAWN_ENTITY_HOOKS 1
 
 ImGuiManager* OurImGuiManager = nullptr;
 DiscordManager* OurDiscordManager = nullptr;

@@ -32,6 +32,12 @@ bool EARS::Modules::PlayerMasterSM::HandleStateMessage(uint32_t SimTime, float F
 		return true;
 	}
 
+	if (MessageID == 0x255)
+	{
+		UpdateFlyMode();
+		return true;
+	}
+
 	// call parent class
 	return EARS::Modules::PlayerSM::HandleStateMessage(SimTime, FrameTime, CurFlags, MessageID, MsgData);
 }
@@ -57,4 +63,30 @@ void EARS::Modules::PlayerMasterSM::InitialiseChild(StateMachine* ChildMachine)
 	}
 
 	EARS::StateMachineSys::StateMachine::InitialiseChild(ChildMachine);
+}
+
+void EARS::Modules::PlayerMasterSM::UpdateFlyMode()
+{
+	const EARS::Modules::PlayerDebugOptions& DebugOptions = *EARS::Modules::PlayerDebugOptions::GetInstance();
+	const bool bFlyModeActive = DebugOptions.IsInDebugFly();
+
+	if (Player* CurPlayer = GetPlayer())
+	{
+		EARS::Havok::CharacterProxy& CharProxy = CurPlayer->GetCharacterProxyChecked();
+		const Havok::CharacterProxy::CollisionState NewState = (bFlyModeActive ? Havok::CharacterProxy::CollisionState::CS_TRIGGERS_ONLY : Havok::CharacterProxy::CollisionState::CS_ENABLED);
+		CharProxy.SetCollisionState(NewState);
+
+		if (bFlyModeActive)
+		{
+			if (GetAsyncKeyState('Q') & 1)
+			{
+				CurPlayer->Translate(RwV3d(0.0f, 10.0f, 0.0f));
+			}
+
+			if (GetAsyncKeyState('E') & 1)
+			{
+				CurPlayer->Translate(RwV3d(0.0f, -10.0f, 0.0f));
+			}
+		}
+	}
 }

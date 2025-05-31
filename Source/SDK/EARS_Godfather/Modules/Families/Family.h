@@ -13,6 +13,9 @@
 #include "SDK/EARS_Godfather/Modules/NPCScheduling/SimNPC.h"
 #include "SDK/EARS_Godfather/Modules/Scoring/MoneyLedger.h"
 
+// C++
+#include <functional>
+
 namespace EARS
 {
 	namespace Modules
@@ -30,12 +33,36 @@ namespace EARS
 			FamilyCategory_MAX_VALUE = 0x4,
 		};
 
+		enum class FamilyFlags : uint32_t
+		{
+			FamilyFlags_REF = 0xFFFFFFFF,
+			FAMILY_IS_HIDDEN_IN_UI = 0x1,
+			FAMILY_IS_FRIENDLY_FIRE_OFF = 0x2,
+			FAMILY_USES_STIMULUS_SOURCE_ENEMIES = 0x4,
+			FAMILY_CAN_HAVE_CRIMES_REPORTED = 0x8,
+			FAMILY_HAS_BEEN_ELIMINATED = 0x10,
+			FAMILY_IS_HIDDEN_FROM_PLAYER = 0x20,
+			FAMILY_NO_STRATEGY_ACTIONS = 0x40,
+			FAMILY_NEW_HIT_INTEL_REVEALED = 0x80,
+			FAMILY_DO_NOT_PLAY_REPUTATION_CHATTER = 0x100,
+			FAMILY_COMPOUND_UNLOCKED = 0x200,
+			FAMILY_SHOW_DON_AS_ALIVE = 0x400,
+			FAMILY_SHOW_DON_AS_DEAD = 0x800,
+			FAMILY_CREW_COMMAND_ENEMY = 0x1000,
+		};
+
 		/**
 		 * An instance of a Family for Godfather II
 		 */
 		class Family : public EARS::Framework::Base
 		{
 		public:
+
+			struct OmertaEntry
+			{
+				uint32_t m_FamilyID = 0;
+				float m_Omerta = 0.0f;
+			};
 
 			/**
 			 * Add a Medic into this Family;
@@ -62,7 +89,15 @@ namespace EARS
 			 */
 			uint32_t GetAllyFamilyID(const uint32_t Index) const;
 			
+			/**
+			 * Get a Made Man from a specific slot in the list
+			 * @param Index - The index we will use to access the Made Man
+			 * @return MadeMan - The Made Man in the given slot
+			 */
 			EARS::Modules::MadeMan* GetMadeManByIndex(const uint32_t Index) const;
+
+			typedef std::function<void(OmertaEntry&)> TVisitOmertaEntryFunctor;
+			void ForEachOmertaTable(const TVisitOmertaEntryFunctor& InFunction);
 
 			// getters
 			inline uint32_t GetFamilyID() const { return m_FamilyID; }
@@ -71,6 +106,14 @@ namespace EARS
 			const String* GetInternalName() const;
 			const String* GetSingularName() const;
 			const String* GetPluralName() const;
+			const float GetMinTurnInterval() const { return m_MinTurnInterval; }
+			const float GetMaxTurnInterval() const { return m_MaxTurnInterval; }
+			const float GetResponseDelay() const { return m_ResponseDelay; }
+
+			// simple setters
+			void SetMinTurnInterval(const float InValue) { m_MinTurnInterval = InValue; }
+			void SetMaxTurnInterval(const float InValue) { m_MaxTurnInterval = InValue; }
+			void SetResponseDelay(const float InValue) { m_ResponseDelay = InValue; }
 
 		private:
 
@@ -87,8 +130,8 @@ namespace EARS
 			{
 				float m_Weight = 0.0f;
 				EARS::Modules::Family::Action m_Action = Action::ACTION_INVALID;
-				void* m_pVenueOfInterest; // EARS::Modules::BuildingStore
-				bool m_IsPlayerInferred = false;
+				void* m_VenueOfInterest = nullptr; // EARS::Modules::BuildingStore
+				bool m_bIsPlayerInferred = false;
 				Array<EARS::Modules::SimNPC*> m_RespondersToUse;
 			};
 
@@ -113,37 +156,40 @@ namespace EARS
 			uint32_t m_FamilyMemberDefeatedScoreEvent = 0;
 			uint32_t m_BuildingTintColor = 0; // RwRGBATag
 			uint32_t m_SelectedBuildingTintColor = 0; // RwRGBATag
-			float m_Balance = 0;																		// 0x100
-			char m_FamilyPadding_1[0xA0];
-			//float m_Income = 0;
-			//Array<void*> m_OwnedRackets; // EARS::Modules::BuildingStore
-			//Array<void*> m_OwnedFronts; // EARS::Modules::BuildingStore
+			float m_Balance = 0;																		// 0x100 - 0x104
+			char m_FamilyPadding_1[0x4]; //float m_Income = 0; ??
+			Array<void*> m_OwnedRackets; // EARS::Modules::BuildingStore
+			Array<void*> m_OwnedFronts; // EARS::Modules::BuildingStore									// 0x114 - 0x120
 			//uint32_t m_NumPeakOwnedVenues = 0;
 			//Array<uint32_t> m_CurrentMonopolyUpgrades;
-			//Array<EARS::Modules::Family::Decision> m_Decisions; // EARS::Modules::Family::Decision
+			char m_FamilyPAdding_2[0x10];
+			Array<EARS::Modules::Family::Decision> m_Decisions;											// 0x130 - 13C
 			//uint32_t m_NumGuards = 0;
 			//uint32_t m_NumGuardSlots = 0;
 			//float m_GuardTransitTime = 0.0f;
-			//float m_MinTurnInterval = 0.0f;
-			//float m_MaxTurnInterval = 0.0f;
-			//float m_ResponseDelay = 0.0f;
+			char m_FamilyPadding_3[0xC];
+			float m_MinTurnInterval = 0.0f;
+			float m_MaxTurnInterval = 0.0f;
+			float m_ResponseDelay = 0.0f;																// 0x150 - 0x154
+			char m_FamilyPadding_4[0x38];
 			//float m_TimeSinceLastAction = 0.0f;
 			//float m_TimeSinceLastActedUpon = 0.0f;
 			//bool m_DesiresToRespond = 0.0f;
 			//EARS::Modules::Family::Bonuses m_bonuses;
-			//Array<EARS::Modules::Family::OmertaEntry> m_aOmertaTable;
-			//float m_fMaxOmerta;
-			//EARS::Modules::BuildingStore* m_pVenueConsidering;
-			//EARS::Modules::Family* m_pFamilyConsidering;
-			Array<EARS::Modules::MadeMan*> m_MadeMen;													// 0x1A4 - 0x1B0		
-			char m_FamilyPadding_2[0x80];
+			Array<EARS::Modules::Family::OmertaEntry> m_OmertaTable;									// 0x18C - 0x198
+			char m_FamilyPadding_5[4]; //float m_MaxOmerta;
+			void* m_VenueConsidering = nullptr;		// EARS::Modules::BuildingStore						// 0x19C - 0x1A0													
+			char m_FamilyPadding_6[4]; //EARS::Modules::Family* m_pFamilyConsidering;
+			Array<EARS::Modules::MadeMan*> m_MadeMen;													// 0x1A4 - 0x1B0
+			char m_FamilyPadding_7[0x20];
 			//float m_aRankPowerMappings[8];
-			//const EARS::Modules::FamilyData* m_pData;
-			//float m_fHospitalTime;
-			//float m_fJailTime;
-			//float m_fCooldownTime;
-			//float m_fHangoutTime;
-			//float m_fVenueBombingDelay;
+			void* m_Data = nullptr;																		// 0x1D0 - 0x1D4
+			float m_HospitalTime = 0.0f;																// 0x1D4 - 0x1D8
+			float m_JailTime = 0.0f;																	// 0x1D8 - 0x1DC
+			float m_CooldownTime = 0.0f;																// 0x1E0 - 0x1E4
+			float m_HangoutTime = 0.0f;																	// 0x1E4 - 0x1E8
+			float m_VenueBombingDelay = 0.0f;															// 0x1E8 - 0x1EC
+			char m_FamilyPadding_8[0x48];
 			//RWS::CEventId m_performStingMsg;
 			//RWS::CEventId m_jailbreakMsg;
 			//RWS::CEventId m_quickRecoveryMsg;

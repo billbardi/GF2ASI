@@ -1,6 +1,6 @@
 #pragma once
 
-// CPP
+// SDK
 #include "SDK/EARS_Godfather/Modules/Player/PlayerSM.h"
 
 namespace EARS
