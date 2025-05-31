@@ -1,11 +1,17 @@
 #include "HookMods.h"
 
+// Addons
 #include "Addons/Hook.h"
 
+// Scripthook
+#include "Scripthook/SH_PlayerMasterSM/PlayerMasterSM_Modded.h"
+
+// SDK
 #include "SDK/EARS_Framework/Toolkits/StateMachine/SMBuilder.h"
 #include "SDK/EARS_Godfather/Modules/Player/PlayerMasterSM.h"
 #include "SDK/EARS_Godfather/Modules/Player/PlayerDebugFlySM.h"
 
+// Pl2
 #include <polyhook2/Detour/x86Detour.hpp>
 #include <polyhook2/ZydisDisassembler.hpp>
 
@@ -14,7 +20,7 @@
 
 EARS::StateMachineSys::StateMachine* S_PlayerMasterSM_FactoryFn(unsigned int id, EARS::StateMachineSys::StateMachineParams* pSMParams)
 {
-	EARS::Modules::PlayerMasterSM* MasterSM = new EARS::Modules::PlayerMasterSM(id, pSMParams);
+	SH::PlayerMasterSM_Modded* MasterSM = new SH::PlayerMasterSM_Modded(id, pSMParams);
 	return MasterSM;
 }
 
@@ -58,6 +64,7 @@ void _cdecl HOOK_PlayerMasterSM_BuildStateMachine()
 	DebugFlyState->AddTransition("start", 1);
 #endif // IMPLEMENT_DEBUG_FLY_SM
 
+	// TODO: While the scripthook features are defined in derived type, we still want to replace original PlayerMasterSM.
 	Builder.CompileAndRegister(0xB08AE1F6, S_PlayerMasterSM_FactoryFn, "PlayerMasterSM");
 
 	Builder.Destroy();
