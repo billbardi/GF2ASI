@@ -2,6 +2,7 @@
 
 // addons
 #include "Scripthook/SH_ImGui/ImGuiNPCInspector.h"
+#include "Utils/Singleton.h"
 
 // RenderWare Framework
 #include "SDK/EARS_Framework/Core/EventHandler/CEventHandler.h"
@@ -31,7 +32,7 @@ namespace EARS
 /**
  * ImGui Manager for the Scripthook
  */
-class ImGuiManager : public RWS::CEventHandler
+class ImGuiManager : public RWS::CEventHandler, public SH::Singleton<ImGuiManager>
 {
 public:
 
@@ -57,6 +58,16 @@ public:
 	 * @return bool - Whether or not it has cursor control
 	 */
 	bool HasCursorControl() const;
+
+	/**
+	 * Update manager when level services become active
+	 */
+	void OpenLevelServices();
+
+	/**
+	 * Update manager when level services close.
+	 */
+	void CloseLevelServices();
 
 	/**
 	 * API for ImGui to listen for Windows messages

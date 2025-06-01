@@ -10,6 +10,9 @@
 #include "SDK/EARS_Common/Guid.h"
 #include "SDK/EARS_Common/RwMaths.h"
 
+// Scripthook
+#include "Utils/Singleton.h"
+
 // CPP
 #include <functional>
 #include <string>
@@ -20,7 +23,7 @@ namespace RWS { class CAttributePacket; }
 
 namespace Mod
 {
-	class ObjectManager : public RWS::CEventHandler
+	class ObjectManager : public RWS::CEventHandler, public SH::Singleton<ObjectManager>
 	{
 	public:
 

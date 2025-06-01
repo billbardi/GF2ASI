@@ -2,6 +2,7 @@
 
 #include "Addons/tConsole.h"
 #include "Addons/tLog.h"
+#include "Addons/Settings.h"
 
 #include <polyhook2/Detour/x86Detour.hpp>
 #include <polyhook2/ZydisDisassembler.hpp>
@@ -12,6 +13,7 @@
 #include "Scripthook/ScripthookEvents.h"
 #include "Scripthook/SH_ImGui/ImGuiManager.h"
 #include "Scripthook/SH_Discord/DiscordManager.h"
+#include "Scripthook/SH_ObjectManager/ObjectManager.h"
 #include "Scripthook/HookMods.h"
 
 #include "SDK/EARS_Godfather/Modules/PartedAnimated/PartedAnimated.h"
@@ -29,9 +31,6 @@
 #define ENABLE_GF2_DISPL_BEGINSCENE_HOOK 0
 #define ENABLE_GF2_GODFATHER_SERVICES_TICK_HOOK 0
 #define ENABLE_GF2_SPAWN_ENTITY_HOOKS 1
-
-ImGuiManager* OurImGuiManager = nullptr;
-DiscordManager* OurDiscordManager = nullptr;
 
 #if ENABLE_GF2_MULTIPLAYER
 struct ConnectionParams
@@ -269,9 +268,9 @@ void __cdecl HOOK_Displ_BeginScene()
 uint64_t Displ_EndScene_Old;
 void __cdecl HOOK_Displ_EndScene()
 {
-	if (OurImGuiManager)
+	if (ImGuiManager* ImGuiMgr = ImGuiManager::Get())
 	{
-		OurImGuiManager->OnEndScene();
+		ImGuiMgr->OnEndScene();
 	}
 
 	PLH::FnCast(Displ_EndScene_Old, &HOOK_Displ_EndScene)();
@@ -303,9 +302,12 @@ uint64_t WinProc_GF2_Old;
 int __stdcall WndProc_GF2(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	// Let ImGui add inputs
-	if (OurImGuiManager && OurImGuiManager->WndProc(hWnd, Msg, wParam, lParam))
+	if (ImGuiManager* ImGuiMgr = ImGuiManager::Get())
 	{
-		return true;
+		if (ImGuiMgr->WndProc(hWnd, Msg, wParam, lParam))
+		{
+			return true;
+		}
 	}
 
 	return PLH::FnCast(WinProc_GF2_Old, &WndProc_GF2)(hWnd, Msg, wParam, lParam);
@@ -317,11 +319,14 @@ int __stdcall WndProc_GF2(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 uint64_t SetCursorPos_old;
 void HOOK_SetCursorPos(int x, int y)
 {
-	if (OurImGuiManager && OurImGuiManager->HasCursorControl())
+	if (const ImGuiManager* ImGuiMgr = ImGuiManager::Get())
 	{
-		// TODO: We can do better than this
-		// avoid the game from forcing the mouse to the centre
-		return;
+		if (ImGuiMgr->HasCursorControl())
+		{
+			// TODO: We can do better than this
+			// avoid the game from forcing the mouse to the centre
+			return;
+		}
 	}
 
 	PLH::FnCast(SetCursorPos_old, &HOOK_SetCursorPos)(x, y);
@@ -364,26 +369,38 @@ void __cdecl Hook_OpenLevelServices()
 	// PURPOSE: Implement PlayerDebugOptions from xbox
 	EARS::Modules::PlayerDebugOptions* NewOptions = new EARS::Modules::PlayerDebugOptions();
 
-	OurImGuiManager = new ImGuiManager();
-	OurImGuiManager->Open();
+	if (Mod::ObjectManager* ObjectMgr = Mod::ObjectManager::Get())
+	{
+		// create a new object manager
+	}
 
-	OurDiscordManager = new DiscordManager();
+	if (ImGuiManager* ImGuiMgr = ImGuiManager::Get())
+	{
+		ImGuiMgr->OpenLevelServices();
+	}
+
+	DiscordManager* OurDiscordManager = DiscordManager::Get();
 	OurDiscordManager->Open();
 }
 
 uint64_t CloseLevelServices_Old;
 void __cdecl Hook_CloseLevelServices()
 {
-	if (OurImGuiManager)
-	{
-		delete OurImGuiManager;
-		OurImGuiManager = nullptr;
-	}
-
-	if (OurDiscordManager)
+	if (DiscordManager* OurDiscordManager = DiscordManager::Get())
 	{
 		delete OurDiscordManager;
 		OurDiscordManager = nullptr;
+	}
+
+	if (Mod::ObjectManager* OwnObjectMgr = Mod::ObjectManager::Get())
+	{
+		delete OwnObjectMgr;
+		OwnObjectMgr = nullptr;
+	}
+
+	if (ImGuiManager* ImGuiMgr = ImGuiManager::Get())
+	{
+		ImGuiMgr->CloseLevelServices();
 	}
 
 	// PURPOSE: Implement PlayerDebugOptions from xbox
@@ -402,6 +419,12 @@ void GF2Hook::Init()
 	tConsole::fCreate("GF2SE");
 
 	PLH::ZydisDisassembler dis(PLH::Mode::x86);
+
+	Settings* SettingsMgr = Settings::Get();
+	SettingsMgr->Init();
+
+	ImGuiManager* OurImGuiManager = ImGuiManager::Get();
+	OurImGuiManager->Open();
 
 	Mod::ApplyHooks();
 

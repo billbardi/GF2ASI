@@ -6,6 +6,9 @@
 // Addons
 #include "Addons/discord/discord.h"
 
+// Scripthook
+#include "Utils/Singleton.h"
+
 // CPP
 #include <ctime>
 #include <string>
@@ -13,7 +16,7 @@
 /**
  * Discord Manager for the Scripthook
  */
-class DiscordManager : public RWS::CEventHandler
+class DiscordManager : public RWS::CEventHandler, public SH::Singleton<DiscordManager>
 {
 public:
 

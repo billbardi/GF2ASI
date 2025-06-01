@@ -1,5 +1,7 @@
 #include "PlayerMasterSM_Modded.h"
 
+#include "Addons/Settings.h"
+
 // SDK
 #include "SDK/EARS_Godfather/Modules/Player/Player.h"
 #include "SDK/EARS_Godfather/Modules/Player/PlayerDebug.h"
@@ -55,16 +57,18 @@ namespace SH
 			const EARS::Havok::CharacterProxy::CollisionState NewState = (bFlyModeActive ? EARS::Havok::CharacterProxy::CollisionState::CS_TRIGGERS_ONLY : EARS::Havok::CharacterProxy::CollisionState::CS_ENABLED);
 			CharProxy.SetCollisionState(NewState);
 
+			Settings& LclSettings = Settings::GetCheckedRef();
+
 			if (bFlyModeActive)
 			{
-				if (GetAsyncKeyState('Q') & 1)
+				if (GetAsyncKeyState(LclSettings.GetFlyModeUpInput()) & 0x8001)
 				{
-					CurPlayer->Translate(RwV3d(0.0f, 10.0f, 0.0f));
+					CurPlayer->Translate(RwV3d(0.0f, 0.1f, 0.0f));
 				}
 
-				if (GetAsyncKeyState('E') & 1)
+				if (GetAsyncKeyState(LclSettings.GetFlyModeDownInput()) & 0x8001)
 				{
-					CurPlayer->Translate(RwV3d(0.0f, -10.0f, 0.0f));
+					CurPlayer->Translate(RwV3d(0.0f, -0.1f, 0.0f));
 				}
 			}
 		}

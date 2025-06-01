@@ -1,8 +1,11 @@
 #pragma once
 
+#include "Utils/Singleton.h"
+
+// C++
 #include <windows.h>
 
-class Settings
+class Settings : public SH::Singleton<Settings>
 {
 public:
 

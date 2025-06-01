@@ -75,9 +75,6 @@ public:
 };
 #endif // ENABLE_ENTITY_SPAWN_DEBUG
 
-Settings OurSettings;
-Mod::ObjectManager* OurObjectMgr;
-
 namespace DefinedEvents
 {
 	static hook::Type<RWS::CEventId> RunningTickEvent = hook::Type<RWS::CEventId>(0x012069C4);
@@ -89,22 +86,13 @@ namespace DefinedEvents
 ImGuiManager::ImGuiManager()
 	: CEventHandler()
 {
-	LinkMsg(&DefinedEvents::RunningTickEvent, 0x8000);
 
-	OurObjectMgr = new Mod::ObjectManager();
 }
 
 ImGuiManager::~ImGuiManager()
 {
 	ImGui_ImplWin32_Shutdown();
 	ImGui_ImplDX9_Shutdown();
-
-	UnlinkMsg(&DefinedEvents::RunningTickEvent);
-	UnlinkMsg(&DefinedEvents::PlayerAsDriverEnterVehicleEvent);
-	UnlinkMsg(&DefinedEvents::PlayerAsPassengerEnterVehicleEvent);
-	UnlinkMsg(&DefinedEvents::PlayerExitVehicleEvent);
-
-	delete OurObjectMgr;
 }
 
 void ImGuiManager::HandleEvents(const RWS::CMsg& MsgEvent)
@@ -154,13 +142,6 @@ void ImGuiManager::Open()
 
 	hook::Type<IDirect3DDevice9*> Dx9Device = hook::Type<IDirect3DDevice9*>(0x1205750);
 	ImGui_ImplDX9_Init(Dx9Device);
-
-	OurSettings.Init();
-
-	// apply more events
-	LinkMsg(&DefinedEvents::PlayerAsDriverEnterVehicleEvent, 0x8000);
-	LinkMsg(&DefinedEvents::PlayerAsPassengerEnterVehicleEvent, 0x8000);
-	LinkMsg(&DefinedEvents::PlayerExitVehicleEvent, 0x8000);
 }
 
 void ImGuiManager::OnEndScene()
@@ -176,6 +157,24 @@ bool ImGuiManager::HasCursorControl() const
 	return bTakeoverCursor;
 }
 
+void ImGuiManager::OpenLevelServices()
+{
+	// apply more events
+	LinkMsg(&DefinedEvents::RunningTickEvent, 0x8000);
+	LinkMsg(&DefinedEvents::PlayerAsDriverEnterVehicleEvent, 0x8000);
+	LinkMsg(&DefinedEvents::PlayerAsPassengerEnterVehicleEvent, 0x8000);
+	LinkMsg(&DefinedEvents::PlayerExitVehicleEvent, 0x8000);
+}
+
+void ImGuiManager::CloseLevelServices()
+{
+	// remove other events
+	UnlinkMsg(&DefinedEvents::RunningTickEvent);
+	UnlinkMsg(&DefinedEvents::PlayerAsDriverEnterVehicleEvent);
+	UnlinkMsg(&DefinedEvents::PlayerAsPassengerEnterVehicleEvent);
+	UnlinkMsg(&DefinedEvents::PlayerExitVehicleEvent);
+}
+
 LRESULT ImGuiManager::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -188,13 +187,6 @@ void ImGuiManager::DrawTab_PlayerSettings()
 	{
 		if (EARS::Modules::Player* LocalPlayer = EARS::Modules::Player::GetLocalPlayer())
 		{
-			if (ImGui::Button("Inspect Player"))
-			{
-				InitialiseNPCInspector(LocalPlayer, true);
-			}
-
-			ImGui::SameLine();
-
 			if (ImGui::CollapsingHeader("Players State", ImGuiTreeNodeFlags_DefaultOpen))
 			{
 				ImGui::TextWrapped("Toggle settings such as NoClip and GodMode");
@@ -218,6 +210,11 @@ void ImGuiManager::DrawTab_PlayerSettings()
 					bPlayerGodModeActive = bNewGodModeActive;
 				}
 
+				if (ImGui::Button("Inspect Player"))
+				{
+					InitialiseNPCInspector(LocalPlayer, true);
+				}
+
 				if (EARS::Modules::CrimeManager* CrimeMgr = EARS::Modules::CrimeManager::GetInstance())
 				{
 					if (ImGui::Button("Call off the police"))
@@ -231,6 +228,8 @@ void ImGuiManager::DrawTab_PlayerSettings()
 			{
 				ImGui::TextWrapped("Modify Players Inventory (Unlimited Ammo, swapping weapons)");
 
+				Mod::ObjectManager& ObjMgrRef = Mod::ObjectManager::GetCheckedRef();
+
 				if (EARS::Modules::InventoryManager* PlayerInventoryMgr = LocalPlayer->GetInventoryManager())
 				{
 					const char* Label = PlayerInventoryMgr->HasPlayerInfiniteAmmo() ? "Remove Unlimited Ammo" : "Give Unlimited Ammo";
@@ -242,7 +241,7 @@ void ImGuiManager::DrawTab_PlayerSettings()
 					ImGui::PushItemWidth(-1.0f);
 					if(ImGui::BeginCombo("##add_to_inventory", InventoryAddItem_SelectedName.data()))
 					{
-						OurObjectMgr->ForEachItem([&](const std::string& Name, const EARS::Common::guid128_t& EntityID)
+						ObjMgrRef.ForEachItem([&](const std::string& Name, const EARS::Common::guid128_t& EntityID)
 						{
 								if (ImGui::Selectable(Name.data(), (InventoryAddItem_SelectedGuid == EntityID)))
 								{
@@ -742,7 +741,8 @@ void ImGuiManager::DrawTab_ObjectMgrSettings()
 	{
 		if (ImGui::BeginTabItem("Object Manager"))
 		{
-			OurObjectMgr->ImGuiDrawContents();
+			Mod::ObjectManager& ObjMgrRef = Mod::ObjectManager::GetCheckedRef();
+			ObjMgrRef.ImGuiDrawContents();
 
 			ImGui::EndTabItem();
 		}
@@ -794,7 +794,8 @@ void ImGuiManager::DrawTab_Support()
 
 void ImGuiManager::OnTick()
 {
-	if (GetAsyncKeyState(OurSettings.GetShowModMenuWindowInput()) & 1) //ImGui::IsKeyPressed(ImGuiKey_F2)
+	const Settings& OwnSettingsMgr = Settings::GetCheckedRef();
+	if (GetAsyncKeyState(OwnSettingsMgr.GetShowModMenuWindowInput()) & 1) //ImGui::IsKeyPressed(ImGuiKey_F2)
 	{
 		bShowModMenuWindow = !bShowModMenuWindow;
 	}
