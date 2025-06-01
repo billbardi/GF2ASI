@@ -1,5 +1,9 @@
 #pragma once
 
+// SDK Godfather
+#include "SDK/EARS_Godfather/Modules/Sentient/SentientConstants.h"
+
+// C++
 #include <stdint.h>
 
 namespace EARS
@@ -28,9 +32,13 @@ namespace EARS
 		{
 		public:
 
-			// getters
+			/** Get rank from the SimNPC (not stored on Made Man) */
+			SentientRank GetRank() const;
+
+			// simple getters
 			EARS::Modules::SimNPC* GetSimNPC() const { return m_SimNPC; }
 			MadeManState GetState() const { return m_State; }
+			uint32_t GetVenueID() const { return m_VenueID; }
 
 		private:
 

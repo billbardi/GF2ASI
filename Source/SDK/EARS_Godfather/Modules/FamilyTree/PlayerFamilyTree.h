@@ -4,6 +4,7 @@
 #include "SDK/EARS_Common/Bitflags.h"
 #include "SDK/EARS_Common/Guid.h"
 #include "SDK/EARS_Common/SafePtr.h"
+#include "SDK/EARS_Godfather/Modules/Sentient/SentientConstants.h"
 
 // CPP
 #include <functional>
@@ -14,23 +15,6 @@ namespace EARS
 	namespace Modules
 	{
 		class SimNPC;
-
-		/**
-		 * Rank for Sentient types
-		 */
-		enum class SentientRank : uint32_t
-		{
-			SentientRank_REF = 0xFFFFFFFF,
-			RANK_CIVILIAN = 0x0,
-			RANK_ASSOCIATE = 0x1,
-			RANK_ASSOCIATE_STRONG = 0x2,
-			RANK_SOLDIER = 0x3,
-			RANK_CAPO = 0x4,
-			RANK_UNDERBOSS = 0x5,
-			RANK_CONSIGLIERE = 0x6,
-			RANK_DON = 0x7,
-			SentientRank_MAX_VALUE = 0x8,
-		};
 
 		enum class Specialties : uint32_t
 		{

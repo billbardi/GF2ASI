@@ -11,6 +11,9 @@
 // SDK Framework
 #include "SDK/EARS_Framework/Core/Base/Base.h"
 
+// SDK Godfather
+#include "SDK/EARS_Godfather/Modules/Sentient/SentientConstants.h"
+
 namespace EARS
 {
 	namespace Modules
@@ -44,6 +47,7 @@ namespace EARS
 			// Fetch the NPC associated with this SimNPC.
 			EARS::Modules::NPC* GetNPC() const { return m_NPC.GetPtr(); }
 			EARS::Common::guid128_t GetNPCGuid() const { return m_NPCGuid; }
+			EARS::Modules::SentientRank GetRank() const { return m_Rank; }
 
 			// Fetch the Upgrade Component for this SimNPC.
 			// After extensive investigation, it was found that this is stored on the SimNPC.
@@ -71,7 +75,7 @@ namespace EARS
 			uint32_t m_NameHashID = 0;
 			uint32_t m_FamilyID = 0;
 			uint32_t m_VenueID = 0;
-			uint32_t m_Rank = 0; // EARS::Modules::SentientRank
+			EARS::Modules::SentientRank m_Rank = EARS::Modules::SentientRank::RANK_CIVILIAN;
 			Flags32 m_NPCFlags;
 			uint32_t m_RoleHashID = 0;
 			uint32_t m_CityHashID = 0;
