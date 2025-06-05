@@ -27,18 +27,38 @@ namespace EARS
 			MADE_MAN_STATE_CREW_UI_ONLY = 0x8,
 		};
 
-
 		class MadeMan
 		{
 		public:
 
+			/** Request a new state for the Made Man */
+			void SetState(MadeManState DesiredState, const float CooldownSec);
+
+			/** Request that a MadeMan moves to another VenueID */
+			void SetVenueID(const uint32_t InVenueID);
+
+			/** Request that the Made Man is released from the venue */
+			void ReleaseFromVenue(MadeManState DesiredState);
+
 			/** Get rank from the SimNPC (not stored on Made Man) */
 			SentientRank GetRank() const;
+
+			/** Calculate how much hospital time this Made Man would have */
+			float GetHospitalTime() const;
+
+			/** Calculate how much jail time this Made Man would have */
+			float GetJailTime() const;
 
 			// simple getters
 			EARS::Modules::SimNPC* GetSimNPC() const { return m_SimNPC; }
 			MadeManState GetState() const { return m_State; }
 			uint32_t GetVenueID() const { return m_VenueID; }
+			float GetCountdown() const { return m_CountdownSec; }
+			float GetHospitalTimeFactor() const { return m_HospitalTimeFactor; }
+			float GetJailTimeFactor() const { return m_JailTimeFactor; }
+
+			/** Static function to convert MadeManState enum to display string */
+			static const char* StateEnumToString(MadeManState State);
 
 		private:
 

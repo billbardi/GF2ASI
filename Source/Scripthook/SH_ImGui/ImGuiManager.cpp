@@ -539,7 +539,16 @@ void ImGuiManager::DrawTab_FamiliesSettings()
 				{
 					const EARS::Modules::MadeMan* CurMadeMan = TargetFamily->GetMadeManByIndex(i);
 					const String* Name = CurMadeMan->GetSimNPC()->GetName();
-					ImGui::BulletText("CurMadeMan: %s -> %u", Name->c_str(), CurMadeMan->GetState());
+					if (ImGui::TreeNode(CurMadeMan, "%s", Name->c_str()))
+					{
+						ImGui::BulletText("State: %s", EARS::Modules::MadeMan::StateEnumToString(CurMadeMan->GetState()));
+						ImGui::BulletText("Venue ID: %u", CurMadeMan->GetVenueID());
+						ImGui::BulletText("Rank: %u", CurMadeMan->GetRank());
+						ImGui::BulletText("State Cooldown: %f", CurMadeMan->GetCountdown());
+
+						ImGui::TreePop();
+
+					}
 				}
 			}
 

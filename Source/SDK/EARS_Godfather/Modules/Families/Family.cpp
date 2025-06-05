@@ -3,6 +3,9 @@
 // Addons
 #include "Addons/Hook.h"
 
+// SDK
+#include "SDK/EARS_Godfather/Modules/Families/MadeMan.h"
+
 // C++
 #include <assert.h>
 

@@ -10,6 +10,7 @@
 #include "SDK/EARS_Common/String.h"
 
 // SDK Godfather
+#include "SDK/EARS_Godfather/Modules/Families/MadeMan.h"
 #include "SDK/EARS_Godfather/Modules/NPCScheduling/SimNPC.h"
 #include "SDK/EARS_Godfather/Modules/Scoring/MoneyLedger.h"
 
@@ -106,9 +107,13 @@ namespace EARS
 			const String* GetInternalName() const;
 			const String* GetSingularName() const;
 			const String* GetPluralName() const;
-			const float GetMinTurnInterval() const { return m_MinTurnInterval; }
-			const float GetMaxTurnInterval() const { return m_MaxTurnInterval; }
-			const float GetResponseDelay() const { return m_ResponseDelay; }
+			float GetMinTurnInterval() const { return m_MinTurnInterval; }
+			float GetMaxTurnInterval() const { return m_MaxTurnInterval; }
+			float GetResponseDelay() const { return m_ResponseDelay; }
+
+			// made men API
+			float GetMadeManHospitalTime() const { return m_HospitalTime; }
+			float GetMadeManJailTime() const { return m_JailTime; }
 
 			// simple setters
 			void SetMinTurnInterval(const float InValue) { m_MinTurnInterval = InValue; }
