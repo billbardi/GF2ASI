@@ -51,7 +51,7 @@ void _cdecl HOOK_PlayerMasterSM_BuildStateMachine()
 	StartState->AddChild("playerF2FStateTable", true);
 
 	// Fly mode update
-	StartState->AddUpdateMessage(0x255);
+	StartState->AddUpdateMessage(0x900);
 
 #if IMPLEMENT_DEBUG_FLY_SM
 	// TRANSITIONS TO DEBUG STATE ADDED FOR MOD

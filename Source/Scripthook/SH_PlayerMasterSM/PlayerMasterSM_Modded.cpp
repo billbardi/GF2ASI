@@ -12,6 +12,7 @@ namespace SH
 {
 	PlayerMasterSM_Modded::PlayerMasterSM_Modded(unsigned int id, EARS::StateMachineSys::StateMachineParams* pSMParams)
 		: EARS::Modules::PlayerMasterSM(id, pSMParams)
+		, bIsFlying(false)
 	{
 	}
 
@@ -27,7 +28,7 @@ namespace SH
 
 	bool PlayerMasterSM_Modded::HandleStateMessage(uint32_t SimTime, float FrameTime, uint32_t CurFlags, uint32_t MessageID, EARS::StateMachineSys::State::StateMessageData* MsgData)
 	{
-		if (MessageID == 0x255)
+		if (MessageID == 0x900)
 		{
 			UpdateFlyMode();
 			return true;
@@ -49,18 +50,28 @@ namespace SH
 	void PlayerMasterSM_Modded::UpdateFlyMode()
 	{
 		const EARS::Modules::PlayerDebugOptions& DebugOptions = *EARS::Modules::PlayerDebugOptions::GetInstance();
-		const bool bFlyModeActive = DebugOptions.IsInDebugFly();
+		const bool bWantsFlyMode = DebugOptions.IsInDebugFly();
 
-		if (EARS::Modules::Player* CurPlayer = GetPlayer())
+		// check if the state is mismatched
+		if (bIsFlying != bWantsFlyMode)
 		{
-			EARS::Havok::CharacterProxy& CharProxy = CurPlayer->GetCharacterProxyChecked();
-			const EARS::Havok::CharacterProxy::CollisionState NewState = (bFlyModeActive ? EARS::Havok::CharacterProxy::CollisionState::CS_TRIGGERS_ONLY : EARS::Havok::CharacterProxy::CollisionState::CS_ENABLED);
-			CharProxy.SetCollisionState(NewState);
-
-			Settings& LclSettings = Settings::GetCheckedRef();
-
-			if (bFlyModeActive)
+			if (EARS::Modules::Player* CurPlayer = GetPlayer())
 			{
+				EARS::Havok::CharacterProxy& CharProxy = CurPlayer->GetCharacterProxyChecked();
+				const EARS::Havok::CharacterProxy::CollisionState NewState = (bWantsFlyMode ? EARS::Havok::CharacterProxy::CollisionState::CS_TRIGGERS_ONLY : EARS::Havok::CharacterProxy::CollisionState::CS_ENABLED);
+				CharProxy.SetCollisionState(NewState);
+			}
+
+			bIsFlying = bWantsFlyMode;
+		}
+
+		// now listen for players inputs
+		if (bIsFlying)
+		{
+			if (EARS::Modules::Player* CurPlayer = GetPlayer())
+			{
+				Settings& LclSettings = Settings::GetCheckedRef();
+
 				if (GetAsyncKeyState(LclSettings.GetFlyModeUpInput()) & 0x8001)
 				{
 					CurPlayer->Translate(RwV3d(0.0f, 0.1f, 0.0f));

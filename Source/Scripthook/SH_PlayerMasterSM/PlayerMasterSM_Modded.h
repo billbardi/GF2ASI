@@ -27,5 +27,7 @@ namespace SH
 
 		/** not part of game, this is for SDK */
 		void UpdateFlyMode();
+
+		bool bIsFlying = false;
 	};
 }
