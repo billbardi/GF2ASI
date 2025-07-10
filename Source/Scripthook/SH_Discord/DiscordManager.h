@@ -32,6 +32,16 @@ public:
 	 */
 	void Open();
 
+	/**
+	 * Update manager when level services become active
+	 */
+	void OpenLevelServices();
+
+	/**
+	 * Update manager when level services close.
+	 */
+	void CloseLevelServices();
+
 private:
 
 	void UpdateState(std::string);

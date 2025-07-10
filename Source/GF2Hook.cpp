@@ -25,6 +25,7 @@
 #include "SDK/EARS_Godfather/Modules/Player/PlayerDebug.h"
 
 #include <sol.hpp>
+#include <SDK/EARS_RT_LLRender/include/ShaderManager.h>
 
 // Disable all Multiplayer, not setup for GF2 Steam exe!
 #define ENABLE_GF2_MULTIPLAYER 0
@@ -369,6 +370,8 @@ void __cdecl Hook_OpenLevelServices()
 	// PURPOSE: Implement PlayerDebugOptions from xbox
 	EARS::Modules::PlayerDebugOptions* NewOptions = new EARS::Modules::PlayerDebugOptions();
 
+	//TestLSShader();
+
 	if (Mod::ObjectManager* ObjectMgr = Mod::ObjectManager::Get())
 	{
 		// create a new object manager
@@ -379,8 +382,11 @@ void __cdecl Hook_OpenLevelServices()
 		ImGuiMgr->OpenLevelServices();
 	}
 
-	DiscordManager* OurDiscordManager = DiscordManager::Get();
-	OurDiscordManager->Open();
+	if (DiscordManager* OurDiscordManager = DiscordManager::Get())
+	{
+		OurDiscordManager->OpenLevelServices();
+	}
+
 }
 
 uint64_t CloseLevelServices_Old;
@@ -388,8 +394,7 @@ void __cdecl Hook_CloseLevelServices()
 {
 	if (DiscordManager* OurDiscordManager = DiscordManager::Get())
 	{
-		delete OurDiscordManager;
-		OurDiscordManager = nullptr;
+		OurDiscordManager->CloseLevelServices();
 	}
 
 	if (Mod::ObjectManager* OwnObjectMgr = Mod::ObjectManager::Get())
@@ -425,6 +430,9 @@ void GF2Hook::Init()
 
 	ImGuiManager* OurImGuiManager = ImGuiManager::Get();
 	OurImGuiManager->Open();
+
+	DiscordManager* OurDiscordManager = DiscordManager::Get();
+	OurDiscordManager->Open();
 
 	Mod::ApplyHooks();
 
@@ -477,9 +485,6 @@ void GF2Hook::Init()
 
 	PLH::x86Detour detour125((char*)0x608250, (char*)&HOOK_Displ_ResetDevice, &Displ_ResetDevice_Old, dis);
 	detour125.hook();
-
-	PLH::x86Detour detour157((char*)0x0403A50, (char*)&HOOK_StreamManager_Load, &StreamManager_Load_Old, dis);
-	detour157.hook();
 
 #if ENABLE_GF2_GODFATHER_SERVICES_TICK_HOOK
 	PLH::x86Detour detour17343((char*)0x8F6CE0, (char*)&HOOK_GodfatherBaseServices_HandleEvents, &GodfatherBaseServices_HandleEvents_Old, dis);

@@ -15,17 +15,17 @@
 namespace Events
 {
 	static hook::Type<RWS::CEventId> RunningTickEvent = hook::Type<RWS::CEventId>(0x012069C4);
-	hook::Type<RWS::CEventId> PlayerAsDriverEnterVehicleEvent = hook::Type<RWS::CEventId>(0x112E030);
-	hook::Type<RWS::CEventId> PlayerExitVehicleEvent = hook::Type<RWS::CEventId>(0x112E018);
-	hook::Type<RWS::CEventId> CityChangedEvent = hook::Type<RWS::CEventId>(0x112DCF4);
-	hook::Type<RWS::CEventId> EnteredSelectMenuEvent = hook::Type<RWS::CEventId>(0x1130378);
-	hook::Type<RWS::CEventId> ExitedSelectMenuEvent = hook::Type<RWS::CEventId>(0x1130218);
-	hook::Type<RWS::CEventId> ChaseStartedEvent = hook::Type<RWS::CEventId>(0x112FE64);
-	hook::Type<RWS::CEventId> ChaseEndedEvent = hook::Type<RWS::CEventId>(0x112FE88);
-	hook::Type<RWS::CEventId> ExtortionSuccessCompleteEvent = hook::Type<RWS::CEventId>(0x112A658);
-	hook::Type<RWS::CEventId> PlayerLostVenueEvent = hook::Type<RWS::CEventId>(0x112A594);
-	hook::Type<RWS::CEventId> EnteredPauseMapEvent = hook::Type<RWS::CEventId>(0x11302B8);
-	hook::Type<RWS::CEventId> ExitedPauseMapEvent = hook::Type<RWS::CEventId>(0x1130248);
+	static hook::Type<RWS::CEventId> PlayerAsDriverEnterVehicleEvent = hook::Type<RWS::CEventId>(0x112E030);
+	static hook::Type<RWS::CEventId> PlayerExitVehicleEvent = hook::Type<RWS::CEventId>(0x112E018);
+	static hook::Type<RWS::CEventId> CityChangedEvent = hook::Type<RWS::CEventId>(0x112DCF4);
+	static hook::Type<RWS::CEventId> EnteredSelectMenuEvent = hook::Type<RWS::CEventId>(0x1130378);
+	static hook::Type<RWS::CEventId> ExitedSelectMenuEvent = hook::Type<RWS::CEventId>(0x1130218);
+	static hook::Type<RWS::CEventId> ChaseStartedEvent = hook::Type<RWS::CEventId>(0x112FE64);
+	static hook::Type<RWS::CEventId> ChaseEndedEvent = hook::Type<RWS::CEventId>(0x112FE88);
+	static hook::Type<RWS::CEventId> ExtortionSuccessCompleteEvent = hook::Type<RWS::CEventId>(0x112A658);
+	static hook::Type<RWS::CEventId> PlayerLostVenueEvent = hook::Type<RWS::CEventId>(0x112A594);
+	static hook::Type<RWS::CEventId> EnteredPauseMapEvent = hook::Type<RWS::CEventId>(0x11302B8);
+	static hook::Type<RWS::CEventId> ExitedPauseMapEvent = hook::Type<RWS::CEventId>(0x1130248);
 }
 
 namespace Precense
@@ -59,19 +59,6 @@ DiscordManager::DiscordManager()
 DiscordManager::~DiscordManager()
 {
 	delete m_Core;
-
-	UnlinkMsg(&Events::RunningTickEvent);
-	UnlinkMsg(&Events::PlayerAsDriverEnterVehicleEvent);
-	UnlinkMsg(&Events::PlayerExitVehicleEvent);
-	UnlinkMsg(&Events::CityChangedEvent);
-	UnlinkMsg(&Events::EnteredSelectMenuEvent);
-	UnlinkMsg(&Events::ExitedSelectMenuEvent);
-	UnlinkMsg(&Events::ChaseStartedEvent);
-	UnlinkMsg(&Events::ChaseEndedEvent);
-	UnlinkMsg(&Events::ExtortionSuccessCompleteEvent);
-	UnlinkMsg(&Events::PlayerLostVenueEvent);
-	UnlinkMsg(&Events::EnteredPauseMapEvent);
-	UnlinkMsg(&Events::ExitedPauseMapEvent);
 }
 
 void DiscordManager::HandleEvents(const RWS::CMsg& MsgEvent)
@@ -160,6 +147,12 @@ void DiscordManager::Open()
 
 	m_Core->ActivityManager().UpdateActivity(m_CurrentActivity, [](discord::Result result) {});
 
+	C_Logger::Printf("Discord Initialised Successfully!");
+}
+
+void DiscordManager::OpenLevelServices()
+{
+	// apply more events
 	LinkMsg(&Events::RunningTickEvent, 0x8000);
 	LinkMsg(&Events::PlayerAsDriverEnterVehicleEvent, 0x8000);
 	LinkMsg(&Events::PlayerExitVehicleEvent, 0x8000);
@@ -172,8 +165,23 @@ void DiscordManager::Open()
 	LinkMsg(&Events::PlayerLostVenueEvent, 0x8000);
 	LinkMsg(&Events::EnteredPauseMapEvent, 0x8000);
 	LinkMsg(&Events::ExitedPauseMapEvent, 0x8000);
+}
 
-	C_Logger::Printf("Discord Initialised Successfully!");
+void DiscordManager::CloseLevelServices()
+{
+	// remove other events
+	UnlinkMsg(&Events::RunningTickEvent);
+	UnlinkMsg(&Events::PlayerAsDriverEnterVehicleEvent);
+	UnlinkMsg(&Events::PlayerExitVehicleEvent);
+	UnlinkMsg(&Events::CityChangedEvent);
+	UnlinkMsg(&Events::EnteredSelectMenuEvent);
+	UnlinkMsg(&Events::ExitedSelectMenuEvent);
+	UnlinkMsg(&Events::ChaseStartedEvent);
+	UnlinkMsg(&Events::ChaseEndedEvent);
+	UnlinkMsg(&Events::ExtortionSuccessCompleteEvent);
+	UnlinkMsg(&Events::PlayerLostVenueEvent);
+	UnlinkMsg(&Events::EnteredPauseMapEvent);
+	UnlinkMsg(&Events::ExitedPauseMapEvent);
 }
 
 void DiscordManager::UpdateState(std::string text)

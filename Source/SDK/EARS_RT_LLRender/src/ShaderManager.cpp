@@ -1,6 +1,7 @@
 #include "SDK/EARS_RT_LLRender/include/ShaderManager.h"
 
 #include "Addons/Hook.h"
+#include "Addons/tConsole.h"
 
 // C++
 #include <d3d9.h>
@@ -55,6 +56,7 @@ SM_Shader_Base* SM_FindShaderWrapperByNumber(const uint32_t ShaderIdx)
 
 void TestLSShader()
 {
+#if DEBUG
 	const LS_Shader* Shaders = LS_ShaderList.ptr();
 
 	for (SM_Shader_Base* Shader = pShaderWrapperList.get(); Shader; Shader = Shader->pNext)
@@ -63,8 +65,11 @@ void TestLSShader()
 		const LS_Shader& VertexShader = Shaders[Shader->psHandle];
 		const LS_Shader& ProgramShader = Shaders[Shader->vsHandle];
 
+		tConsole::fPrintf("START_SHADER");
+		tConsole::fWriteLine(Name);
+
 		if (ID3DXConstantTable* pConstantTable = VertexShader.constantTable)
-		{	
+		{
 			D3DXCONSTANTTABLE_DESC Desc1;
 			pConstantTable->GetDesc(&Desc1);
 			for (UINT i = 0; i < Desc1.Constants; ++i)
@@ -78,7 +83,7 @@ void TestLSShader()
 				HRESULT hr = pConstantTable->GetConstantDesc(hConstant, &desc, &count);
 				if (SUCCEEDED(hr)) {
 					// Print constant info
-					printf("Name: %s, RegisterSet: %d, RegisterIndex: %u, RegisterCount: %u, Type: %d, Class: %d\n",
+					tConsole::fPrintf("%s %d %u %u %d %d",
 						desc.Name,
 						desc.RegisterSet,
 						desc.RegisterIndex,
@@ -106,17 +111,19 @@ void TestLSShader()
 				HRESULT hr = pConstantTable->GetConstantDesc(hConstant, &desc, &count);
 				if (SUCCEEDED(hr)) {
 					// Print constant info
-					printf("Name: %s, RegisterSet: %d, RegisterIndex: %u, RegisterCount: %u, Type: %d, Class: %d\n",
+					tConsole::fPrintf("%s %d %u %u %d %d",
 						desc.Name,
 						desc.RegisterSet,
 						desc.RegisterIndex,
 						desc.RegisterCount,
 						desc.Type,
-						desc.Class);
+						desc.Class,
+						desc.DefaultValue);
 				}
 			}
-
-			int z= 0;
 		}
+
+		tConsole::fWriteLine("END_SHADER");
 	}
+#endif // DEBUG
 }
