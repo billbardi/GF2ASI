@@ -26,3 +26,5 @@ SM_Shader_Base* SM_FindShaderWrapper(const uint32_t NameHash);
 SM_Shader_Base* SM_FindShaderWrapperByNumber(const uint32_t ShaderIdx);
 
 void TestLSShader();
+
+void TestLSShaderData();

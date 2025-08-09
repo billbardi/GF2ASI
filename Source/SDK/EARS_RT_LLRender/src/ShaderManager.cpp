@@ -19,9 +19,25 @@ struct LS_Shader
 	uint8_t Unk3;
 };
 
+struct SM_ShaderData
+{
+	const char* m_Name = nullptr;
+	const void* m_VSCode = nullptr;
+	void* m_Unk8 = nullptr; // Should be vertex definition
+	uint32_t m_UnkC = 0; // should be vertex related
+	uint32_t m_Unk10 = 0; // Should be vertex related
+	const void* m_PSCode = nullptr;
+	void* m_Unk18 = nullptr; // unknown
+	void* m_Unk1C = nullptr; // unknown;
+	uint8_t m_Unk20 = 0; // flag
+	uint8_t m_Unk21 = 0; // flag
+	uint16_t m_Padding = 0; // padding to complete struct (eg. align)
+};
+
 hook::Type<uint32_t> ShaderWrapperListCount = hook::Type<uint32_t>(0x12058F8);
 hook::Type<SM_Shader_Base*> pShaderWrapperList = hook::Type<SM_Shader_Base*>(0x12058EC);
 hook::Type<LS_Shader[2048]> LS_ShaderList = hook::Type<LS_Shader[2048]>(0x11EB900);
+hook::Type<SM_ShaderData[38]> kShaderData = hook::Type<SM_ShaderData[38]>(0xE7B3C0);
 
 uint32_t SM_ShaderCount()
 {
@@ -126,4 +142,14 @@ void TestLSShader()
 		tConsole::fWriteLine("END_SHADER");
 	}
 #endif // DEBUG
+}
+
+void TestLSShaderData()
+{
+	SM_ShaderData* StartPtr = kShaderData.ptr();
+	for (uint32_t Idx = 0; Idx < 38; Idx++)
+	{
+		const SM_ShaderData& CurrentShader = StartPtr[Idx];
+		int z = 0;
+	}
 }

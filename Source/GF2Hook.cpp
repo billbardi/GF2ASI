@@ -371,6 +371,7 @@ void __cdecl Hook_OpenLevelServices()
 	EARS::Modules::PlayerDebugOptions* NewOptions = new EARS::Modules::PlayerDebugOptions();
 
 	//TestLSShader();
+	TestLSShaderData();
 
 	if (Mod::ObjectManager* ObjectMgr = Mod::ObjectManager::Get())
 	{
