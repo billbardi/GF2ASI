@@ -28,7 +28,7 @@ namespace Events
 	static hook::Type<RWS::CEventId> ExitedPauseMapEvent = hook::Type<RWS::CEventId>(0x1130248);
 }
 
-namespace Precense
+namespace Presence
 {
 	// Hardcoded list for image icons
 	// We could probably eventually switch this to include venues too.
@@ -88,7 +88,7 @@ void DiscordManager::HandleEvents(const RWS::CMsg& MsgEvent)
 			if (const String* DisplayName = CityMgr->GetDisplayName(CurrentCityID))
 			{
 				currentCity = DisplayName->c_str();
-				m_CurrentActivity.GetAssets().SetLargeImage(Precense::GetSmallImageFromCityID(CurrentCityID));
+				m_CurrentActivity.GetAssets().SetLargeImage(Presence::GetSmallImageFromCityID(CurrentCityID));
 				UpdateState("Walking around");
 			}
 		}
@@ -145,6 +145,7 @@ void DiscordManager::Open()
 	m_CurrentActivity.GetAssets().SetSmallImage("main");
 	m_CurrentActivity.GetTimestamps().SetStart(discord::Timestamp(std::time(0)));
 
+	assert(m_Core && "Discord Manager should have a m_Core to update state");
 	m_Core->ActivityManager().UpdateActivity(m_CurrentActivity, [](discord::Result result) {});
 
 	C_Logger::Printf("Discord Initialised Successfully!");

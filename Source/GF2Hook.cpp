@@ -421,7 +421,10 @@ void __cdecl Hook_CloseLevelServices()
 
 void GF2Hook::Init()
 {
+#if DEBUG
 	C_Logger::Create("GF2_Hook.txt");
+#endif // DEBUG
+
 	tConsole::fCreate("GF2SE");
 
 	PLH::ZydisDisassembler dis(PLH::Mode::x86);
