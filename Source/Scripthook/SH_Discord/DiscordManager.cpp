@@ -153,18 +153,22 @@ void DiscordManager::Open()
 void DiscordManager::OpenLevelServices()
 {
 	// apply more events
-	LinkMsg(&Events::RunningTickEvent, 0x8000);
-	LinkMsg(&Events::PlayerAsDriverEnterVehicleEvent, 0x8000);
-	LinkMsg(&Events::PlayerExitVehicleEvent, 0x8000);
-	LinkMsg(&Events::CityChangedEvent, 0x8000);
-	LinkMsg(&Events::EnteredSelectMenuEvent, 0x8000);
-	LinkMsg(&Events::ExitedSelectMenuEvent, 0x8000);
-	LinkMsg(&Events::ChaseStartedEvent, 0x8000);
-	LinkMsg(&Events::ChaseEndedEvent, 0x8000);
-	LinkMsg(&Events::ExtortionSuccessCompleteEvent, 0x8000);
-	LinkMsg(&Events::PlayerLostVenueEvent, 0x8000);
-	LinkMsg(&Events::EnteredPauseMapEvent, 0x8000);
-	LinkMsg(&Events::ExitedPauseMapEvent, 0x8000);
+	// We can only apply if discord is active
+	if (m_Core)
+	{
+		LinkMsg(&Events::RunningTickEvent, 0x8000);
+		LinkMsg(&Events::PlayerAsDriverEnterVehicleEvent, 0x8000);
+		LinkMsg(&Events::PlayerExitVehicleEvent, 0x8000);
+		LinkMsg(&Events::CityChangedEvent, 0x8000);
+		LinkMsg(&Events::EnteredSelectMenuEvent, 0x8000);
+		LinkMsg(&Events::ExitedSelectMenuEvent, 0x8000);
+		LinkMsg(&Events::ChaseStartedEvent, 0x8000);
+		LinkMsg(&Events::ChaseEndedEvent, 0x8000);
+		LinkMsg(&Events::ExtortionSuccessCompleteEvent, 0x8000);
+		LinkMsg(&Events::PlayerLostVenueEvent, 0x8000);
+		LinkMsg(&Events::EnteredPauseMapEvent, 0x8000);
+		LinkMsg(&Events::ExitedPauseMapEvent, 0x8000);
+	}
 }
 
 void DiscordManager::CloseLevelServices()
@@ -186,6 +190,8 @@ void DiscordManager::CloseLevelServices()
 
 void DiscordManager::UpdateState(std::string text)
 {
+	assert(m_Core && "Discord Manager must be enabled to update state!");
+
 	const std::string NewState = std::format("{} {}", text, currentCity);
 	m_CurrentActivity.SetState(NewState.data());
 	m_Core->ActivityManager().UpdateActivity(m_CurrentActivity, [](discord::Result result) {});
@@ -193,11 +199,15 @@ void DiscordManager::UpdateState(std::string text)
 
 void DiscordManager::UpdateDetails(std::string text)
 {
+	assert(m_Core && "Discord Manager must be enabled to update activity details!");
+
 	m_CurrentActivity.SetDetails(text.data());
 	m_Core->ActivityManager().UpdateActivity(m_CurrentActivity, [](discord::Result result) {});
 }
 
 void DiscordManager::OnTick()
 {
+	assert(m_Core && "Discord Manager must be enabled to tick");
+
 	m_Core->RunCallbacks();
 }
