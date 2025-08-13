@@ -53,6 +53,7 @@ namespace RWS
 
 			// fetch the current entity
 			const RWS::CAttributeHandler* GetEntity() const { return m_CurrentHandler; }
+			RWS::CAttributeHandler* GetEntity_Mutable() { return const_cast<RWS::CAttributeHandler*>(m_CurrentHandler); }
 
 			// operator overloads
 			const RWS::CAttributeHandler* operator*() { return GetEntity(); }

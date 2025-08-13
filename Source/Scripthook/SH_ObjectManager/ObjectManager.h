@@ -23,6 +23,56 @@ namespace RWS { class CAttributePacket; }
 
 namespace Mod
 {
+	struct EntityEntry
+	{
+		// TODO: Can we use games String*?
+		// Reduce duplicate text then.
+		std::string Name;
+
+		// the Attribute packet GUID for the entity.
+		EARS::Common::guid128_t GUID;
+	};
+
+	/**
+	* List of objects which exist at runtime
+	* TODO: Make non copyable
+	*/
+	struct ObjectEntryList final
+	{
+	public:
+
+		ObjectEntryList();
+		~ObjectEntryList();
+
+		// register an entity with the entity list
+		// does not check for duplicates!
+		void RegisterEntry(const EntityEntry& InEntry);
+
+		// render list in ImGui, includes search, filters and list.
+		void DrawList();
+
+		// clears and empties the object entry list
+		void ClearList();
+
+		// Iterate through all entries within the list
+		typedef std::function<void(const EntityEntry& Entry)> TVisitEntityFunctor;
+		void ForEachEntry(const TVisitEntityFunctor& InFunction);
+
+		// get the selected guid from the list
+		EARS::Common::guid128_t GetSelectedGUID() const { return SelectedGuid; }
+
+	private:
+
+		// trigger a search using the current filters
+		void RequestSearch();
+
+		std::vector<EntityEntry> Entries;
+		std::vector<uint32_t> FilteredEntries;
+		EARS::Common::guid128_t SelectedGuid;
+		ImGuiTextFilter ObjectFilter;
+		bool bSearchModeActive = false;
+	};
+
 	class ObjectManager : public RWS::CEventHandler, public SH::Singleton<ObjectManager>
 	{
 	public:
@@ -60,6 +110,9 @@ namespace Mod
 		// Spawn an object in the game world
 		bool RequestSpawnCar(const ObjectSpawnRequestParams& RequestParams);
 
+		// Fetch SimNPC list stored in the Object Manager
+		ObjectEntryList& GetSimNPCList() { return NPCSpawnList; }
+
 		// Iterate through all items and run the supplied function
 		typedef std::function<void(const std::string&, const EARS::Common::guid128_t&)> TVisitEntityFunctor;
 		void ForEachItem(const TVisitEntityFunctor& InFunction);
@@ -68,56 +121,6 @@ namespace Mod
 
 		// current spawn parameters for a deferred item.
 		ObjectSpawnRequestParams CurrentRequestParams;
-
-		struct EntityEntry
-		{
-			// TODO: Can we use games String*?
-			// Reduce duplicate text then.
-			std::string Name;
-
-			// the Attribute packet GUID for the entity.
-			EARS::Common::guid128_t GUID;
-		};
-
-		/**
-		 * Internal object list for specific type
-		 * Only usable by object manager
-		 */
-		struct ObjectEntryList final
-		{
-		public:
-
-			ObjectEntryList();
-			~ObjectEntryList();
-
-			// register an entity with the entity list
-			// does not check for duplicates!
-			void RegisterEntry(const EntityEntry& InEntry);
-
-			// render list in ImGui, includes search, filters and list.
-			void DrawList();
-
-			// clears and empties the object entry list
-			void ClearList();
-
-			// Iterate through all entries within the list
-			typedef std::function<void(const EntityEntry& Entry)> TVisitEntityFunctor;
-			void ForEachEntry(const TVisitEntityFunctor& InFunction);
-
-			// get the selected guid from the list
-			EARS::Common::guid128_t GetSelectedGUID() const { return SelectedGuid; }
-
-		private:
-
-			// trigger a search using the current filters
-			void RequestSearch();
-
-			std::vector<EntityEntry> Entries;
-			std::vector<uint32_t> FilteredEntries;
-			EARS::Common::guid128_t SelectedGuid;
-			ImGuiTextFilter ObjectFilter;
-			bool bSearchModeActive = false;
-		};
 
 		// Entity spawn lists
 		ObjectEntryList VehicleSpawnList;

@@ -62,6 +62,10 @@ namespace EARS
 			// This is part of engine code
 			bool IsSlotFilled() const;
 
+			// Check whether the Slot is usable by the Player
+			// This is part of engine code
+			bool IsSlotUnlocked() const;
+
 			// Trigger this member of the family to automatically join the Players crew.
 			void JoinCrew();
 
@@ -145,6 +149,32 @@ namespace EARS
 			 * @param InTreeType - The desired Tree Type we should be using.
 			 */
 			void SetCurrentTreeType(const FamilyTreeType InTreeType) const;
+
+			/**
+			 * Expand Family Tree to ensure specific Rank can fit in the current tree 
+			 * @param InRank - Desired Rank to expand to.
+			 * @return bool - Whether or not the Tree was expanded.
+			 */
+			bool ExpandToFit(EARS::Modules::SentientRank InRank);
+
+			/**
+			 * Add a new NPC into the Family, at the specified slot.
+			 * Can also define initial weapon type and specialities.
+			 * @param InRank - Desired rank for the SimNPC
+			 * @param InSimNPC - The desired NPC to add to the Family Tree
+			 * @param InSpecialties - The initial speciality added to the SimNPC
+			 * @param InTreeSlot - Target slot the NPC should be assigned to
+			 * @param InWeaponGUID - The Weapon ID the SimNPC should use
+			 * @return bool - Whether or not the SimNPC was added to the Family Tree
+			 */
+			bool AddFamilyMember(EARS::Modules::SentientRank InRank, EARS::Modules::SimNPC* InSimNPC, uint32_t InSpecialties, FamilyTreeSlot InTreeSlot, EARS::Common::guid128_t* InWeaponGuid);
+
+			/**
+			 * Remove a member from the specified slot, using bUpdateFamily to update original file
+			 * @param InSlotIndex - We want to remove the Family member from.
+			 * @param bUpdateFamily - Whether to update the associated Family.
+			 */
+			bool RemoveFamilyMember(EARS::Modules::PlayerFamilyTree::FamilyTreeSlot InSlotIndex, bool bUpdateFamily);
 
 			/**
 			 * Utility function to iterate through all loaded Cities

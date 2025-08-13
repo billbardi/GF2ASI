@@ -254,23 +254,23 @@ void Mod::ObjectManager::ImGuiDrawContents()
 	}
 }
 
-Mod::ObjectManager::ObjectEntryList::ObjectEntryList()
+Mod::ObjectEntryList::ObjectEntryList()
 {
 	Entries.reserve(1024);
 	FilteredEntries.reserve(512);
 }
 
-Mod::ObjectManager::ObjectEntryList::~ObjectEntryList()
+Mod::ObjectEntryList::~ObjectEntryList()
 {
 	ClearList();
 }
 
-void Mod::ObjectManager::ObjectEntryList::RegisterEntry(const EntityEntry& InEntry)
+void Mod::ObjectEntryList::RegisterEntry(const EntityEntry& InEntry)
 {
 	Entries.push_back(InEntry);
 }
 
-void Mod::ObjectManager::ObjectEntryList::DrawList()
+void Mod::ObjectEntryList::DrawList()
 {
 	ObjectFilter.Draw("##filter");
 	ImGui::SameLine();
@@ -309,14 +309,14 @@ void Mod::ObjectManager::ObjectEntryList::DrawList()
 	ImGui::PopItemWidth();
 }
 
-void Mod::ObjectManager::ObjectEntryList::ClearList()
+void Mod::ObjectEntryList::ClearList()
 {
 	Entries.clear();
 	FilteredEntries.clear();
 	SelectedGuid = {};
 }
 
-void Mod::ObjectManager::ObjectEntryList::ForEachEntry(const TVisitEntityFunctor& InFunction)
+void Mod::ObjectEntryList::ForEachEntry(const TVisitEntityFunctor& InFunction)
 {
 	for (const EntityEntry& Entry : Entries)
 	{
@@ -324,7 +324,7 @@ void Mod::ObjectManager::ObjectEntryList::ForEachEntry(const TVisitEntityFunctor
 	}
 }
 
-void Mod::ObjectManager::ObjectEntryList::RequestSearch()
+void Mod::ObjectEntryList::RequestSearch()
 {
 	FilteredEntries.clear();
 

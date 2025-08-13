@@ -573,6 +573,10 @@ void ImGuiManager::DrawTab_FamiliesSettings()
 
 void ImGuiManager::DrawTab_PlayerFamilyTreeSettings()
 {
+	Mod::ObjectManager& ObjMgr = Mod::ObjectManager::GetCheckedRef();
+
+	EARS::Framework::SimManager* SimMgr = EARS::Framework::SimManager::GetInstance();
+
 	if (ImGui::BeginTabItem("Player Family Tree Settings", nullptr, ImGuiTabItemFlags_None))
 	{
 		EARS::Modules::CorleoneFamilyData* FamilyData = EARS::Modules::CorleoneFamilyData::GetInstance();
@@ -705,8 +709,44 @@ void ImGuiManager::DrawTab_PlayerFamilyTreeSettings()
 						ImGui::TreePop();
 					}
 
+#if DEBUG
+					if (ImGui::TreeNode("Replace Made Man"))
+					{
+						Mod::ObjectEntryList& SimNPCList = ObjMgr.GetSimNPCList();
+						SimNPCList.DrawList();
+
+						if (ImGui::Button("Replace"))
+						{
+							const EARS::Common::guid128_t TargetGUID = SimNPCList.GetSelectedGUID();
+							if (RWS::CAttributePacket* FoundPacket = SimMgr->GetAttributePacket(&TargetGUID, 0))
+							{
+								auto PacketIt = FoundPacket->GetEntityIterator();
+								RWS::CAttributeHandler* FirstHandler = PacketIt.GetEntity_Mutable();
+								EARS::Modules::SimNPC* AsSimNPC = static_cast<EARS::Modules::SimNPC*>(FirstHandler);
+
+								// need to remove prior family member
+								auto FoundSlotIndex = FamilyTreeData->FindTreeSlotIndex(InMember.GetSimNPC());
+								if (FoundSlotIndex != EARS::Modules::PlayerFamilyTree::FamilyTreeSlot::FAMILYTREE_SLOT_INVALID)
+								{
+									FamilyTreeData->RemoveFamilyMember(FoundSlotIndex, true);
+								}
+
+								// now replace with the new family member
+								FamilyTreeData->AddFamilyMember(
+									InMember.GetRank(),
+									AsSimNPC,
+									0,  /* specialites */
+									EARS::Modules::PlayerFamilyTree::FamilyTreeSlot::FAMILYTREE_SLOT_INVALID,
+									nullptr /* weapon guid */);
+							}
+						}
+
+						ImGui::TreePop();
+					}
+
 					ImGui::TreePop();
 				}
+#endif // DEBUG
 
 				CurrentIdx++;
 
