@@ -3,6 +3,8 @@
 // SDK
 #include "SDK/EARS_Common/Array.h"
 #include "SDK/EARS_Common/Guid.h"
+#include "SDK/EARS_Common/Singleton.h"
+#include "SDK/EARS_Framework/Core/Persistence/PersistenceRegistry.h"
 
 // CPP
 #include <functional>
@@ -16,7 +18,7 @@ namespace EARS
 		 * Family data, primarily stores information between SP and MP.
 		 * Includes Honour data and Weapon Licenses for specific NPCs.
 		 */
-		class CorleoneFamilyData
+		class CorleoneFamilyData : public EARS::Framework::IPersistable, public Singleton<CorleoneFamilyData>
 		{
 		public:
 
@@ -51,6 +53,15 @@ namespace EARS
 			 */
 			void SetWeaponLicense(const EARS::Common::guid128_t& SimNPCGuid, const uint8_t NewWeaponLevel);
 
+			/** Has this Player unlocked the Pre-order content? */
+			bool HasUnlockedPreOrderCrew();
+
+			/** Lock the Pre-order content from the Player */
+			void LockPreOrderCrew();
+
+			/** Unlock the Pre-Order content for the Player */
+			void UnlockPreOrderCrew();
+
 			/**
 			 * Utility function to iterate through all loaded Cities
 			 * All const, we do not expect to modify any of the assemblies during iteration.
@@ -70,11 +81,9 @@ namespace EARS
 			// Use the public API to fetch correct data
 			int32_t FindHonourData(const EARS::Common::guid128_t& SimNpcGuid) const;
 
-			void* vtbl;
-			void* vtbl2;
 			Array<EARS::Modules::CorleoneFamilyData::HonorData>  m_Honors;
 			float m_Balance = 0.0f;
-			bool m_PreOrderCrewUnlocked = false;
+			bool m_bPreOrderCrewUnlocked = false;
 		};
 	} // Framework
 } // EARS

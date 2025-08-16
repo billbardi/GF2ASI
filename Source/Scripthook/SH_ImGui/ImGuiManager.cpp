@@ -597,6 +597,21 @@ void ImGuiManager::DrawTab_PlayerFamilyTreeSettings()
 			return;
 		}
 
+
+		// let the user toggle pre-order bonuses
+		bool bCurrentPreOrderFlag = FamilyData->HasUnlockedPreOrderCrew();
+		if (ImGui::Checkbox("Unlock Pre-Order Crew", &bCurrentPreOrderFlag))
+		{
+			if (bCurrentPreOrderFlag)
+			{
+				FamilyData->UnlockPreOrderCrew();
+			}
+			else
+			{
+				FamilyData->LockPreOrderCrew();
+			}
+		}
+
 		if (ImGui::CollapsingHeader("Crew Members (simple)", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			if (ImGui::Button("Add all members to crew"))

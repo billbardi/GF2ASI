@@ -12,5 +12,15 @@ namespace EARS
 			TType* m_Next = nullptr;
 			TType* m_Prev = nullptr;
 		};
+
+		template <typename TType>
+		struct DoubleInternalLinkedList
+		{
+		private:
+
+			TType* m_Head = nullptr;
+			TType* m_Tail = nullptr;
+		};
+
 	} // Common
 } // EARS

@@ -3,6 +3,7 @@
 // RenderWare Framework
 #include "SDK/EARS_Common/Guid.h"
 #include "SDK/EARS_Common/HashTable.h"
+#include "SDK/EARS_Common/DoubleInternalLinkedList.h"
 #include "SDK/EARS_Framework/Core/AttributeHandler/CAttributeHandler.h"
 #include "SDK/EARS_Framework/Core/EventHandler/CEventHandler.h"
 #include "SDK/EARS_Framework/Core/ResourceManager/CResourceHandler.h"
@@ -10,10 +11,35 @@
 // C++
 #include <functional>
 
+// forward declares
+namespace RWS
+{
+	class CAttributePacket;
+}
+
 namespace EARS
 {
 	namespace Framework
 	{
+		/**
+		 * Defines a SimGroup structure the game uses to generate entities from packets 
+		 */
+		struct SimGroupTOC : public EARS::Common::DoubleLinkedListNodeMixin<SimGroupTOC>
+		{
+		public:
+
+			uint32_t m_MagicNumber = 0;
+			uint32_t m_VersionOrDispatchTime = 0;
+			uint32_t m_Guid = 0; // actually zero
+			uint32_t m_Flags = 0;
+			uint32_t m_NumEnts = 0;
+			uint32_t m_NumEntsDispatched = 0;
+			uint32_t m_SharedDataSize = 0;
+			uint32_t m_DictionarySize = 0;
+			RWS::CAttributePacket** m_EntPackets = nullptr;
+			uint32_t m_hStream = 0;
+		};
+
 		// TODO: Implement Singleton base class
 		class SimManager : public RWS::CEventHandler, public RWS::CResourceHandler/*, public Singleton<CResourceManager>*/
 		{
@@ -60,6 +86,7 @@ namespace EARS
 			// TODO: This is fairly messy
 			DEFINE_MEMBER_IntrusiveHashTable(EARS::Common::guid128_t, RWS::CAttributePacket, AttrPacketGetKey, EARS::Common::HashNext<RWS::CAttributePacket>, m_AttributePacketHash);
 			EARS::Common::IntrusiveHashTable<EARS::Common::guid128_t, RWS::CAttributeHandler> m_AttributeHandlerHash;
+			EARS::Common::DoubleInternalLinkedList<EARS::Framework::SimGroupTOC> m_SimGroupListArr[4];
 		};
 	}
 }

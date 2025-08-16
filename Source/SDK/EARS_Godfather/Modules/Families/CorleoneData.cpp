@@ -59,6 +59,21 @@ void EARS::Modules::CorleoneFamilyData::SetWeaponLicense(const EARS::Common::gui
 	}
 }
 
+bool EARS::Modules::CorleoneFamilyData::HasUnlockedPreOrderCrew()
+{
+	return (m_bPreOrderCrewUnlocked == true);
+}
+
+void EARS::Modules::CorleoneFamilyData::LockPreOrderCrew()
+{
+	m_bPreOrderCrewUnlocked = false;
+}
+
+void EARS::Modules::CorleoneFamilyData::UnlockPreOrderCrew()
+{
+	m_bPreOrderCrewUnlocked = true;
+}
+
 void EARS::Modules::CorleoneFamilyData::ForEachHonourData(const TVisitHonorDataFunctor& InFunction)
 {
 	for (uint32_t i = 0; i < m_Honors.Size(); i++)
