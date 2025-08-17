@@ -14,6 +14,7 @@ public:
 	int GetShowModMenuWindowInput() const;
 	int GetFlyModeUpInput() const;
 	int GetFlyModeDownInput() const;
+	bool WantsPreOrderBonus() const { return bWantsPreOrderBonus; }
 
 private:
 
@@ -25,4 +26,7 @@ private:
 
 	// Virtual Key to get down in fly mode
 	int FlyModeDownInput = VK_NEXT;
+
+	// Whether or not the Player wants Pre-order bonus unlocked
+	bool bWantsPreOrderBonus = true;
 };

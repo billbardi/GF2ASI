@@ -13,9 +13,10 @@ void Settings::Init()
 	if (std::filesystem::exists(CompletePath))
 	{
 		const std::wstring& WidePath = CompletePath.wstring();
-		ShowModMenuWindowInput = GetPrivateProfileIntW(L"Keybinds", L"model", ShowModMenuWindowInput, WidePath.data());
-		FlyModeUpInput = GetPrivateProfileIntW(L"Keybinds", L"flyup", FlyModeUpInput, WidePath.data());
-		FlyModeDownInput = GetPrivateProfileIntW(L"Keybinds", L"flydown", FlyModeDownInput, WidePath.data());
+		ShowModMenuWindowInput = GetPrivateProfileIntW(L"Keybinds", L"model", VK_F1, WidePath.data());
+		FlyModeUpInput = GetPrivateProfileIntW(L"Keybinds", L"flyup", VK_PRIOR, WidePath.data());
+		FlyModeDownInput = GetPrivateProfileIntW(L"Keybinds", L"flydown", VK_NEXT, WidePath.data());
+		bWantsPreOrderBonus = GetPrivateProfileIntW(L"Mods", L"UnlockPreOrderCrew", true, WidePath.data());
 	}
 }
 

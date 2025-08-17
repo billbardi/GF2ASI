@@ -16,16 +16,17 @@
 #include "Scripthook/SH_ObjectManager/ObjectManager.h"
 #include "Scripthook/HookMods.h"
 
-#include "SDK/EARS_Godfather/Modules/PartedAnimated/PartedAnimated.h"
 #include "SDK/EARS_Common/Guid.h"
+#include "SDK/EARS_Godfather/Modules/PartedAnimated/PartedAnimated.h"
+#include "SDK/EARS_Godfather/Modules/Families/CorleoneData.h"
 #include "SDK/EARS_Godfather/Modules/NPCScheduling/DemographicRegion.h"
 #include "SDK/EARS_Godfather/Modules/Scoring/ScoreKeeper.h"
 #include "SDK/EARS_Godfather/Modules/Mobface/MobfaceManager.h"
 #include "SDK/EARS_Godfather/Modules/NPC/NPC.h"
 #include "SDK/EARS_Godfather/Modules/Player/PlayerDebug.h"
+#include <SDK/EARS_RT_LLRender/include/ShaderManager.h>
 
 #include <sol.hpp>
-#include <SDK/EARS_RT_LLRender/include/ShaderManager.h>
 
 // Disable all Multiplayer, not setup for GF2 Steam exe!
 #define ENABLE_GF2_MULTIPLAYER 0
@@ -371,7 +372,22 @@ void __cdecl Hook_OpenLevelServices()
 	EARS::Modules::PlayerDebugOptions* NewOptions = new EARS::Modules::PlayerDebugOptions();
 
 	//TestLSShader();
-	TestLSShaderData();
+	//TestLSShaderData();
+
+	if (EARS::Modules::CorleoneFamilyData* FamilyData = EARS::Modules::CorleoneFamilyData::GetInstance())
+	{
+		const Settings& OurSettings = Settings::GetCheckedRef();
+		if (OurSettings.WantsPreOrderBonus())
+		{
+			FamilyData->UnlockPreOrderCrew();
+		}
+		else
+		{
+			FamilyData->LockPreOrderCrew();
+		}
+	}
+
+	const Settings& HookSettings = Settings::GetCheckedRef();
 
 	if (Mod::ObjectManager* ObjectMgr = Mod::ObjectManager::Get())
 	{
