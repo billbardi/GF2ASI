@@ -17,6 +17,7 @@
 #include "Scripthook/HookMods.h"
 
 #include "SDK/EARS_Common/Guid.h"
+#include "SDK/EARS_Framework/Core/SimManager/SimManager.h"
 #include "SDK/EARS_Godfather/Modules/PartedAnimated/PartedAnimated.h"
 #include "SDK/EARS_Godfather/Modules/Families/CorleoneData.h"
 #include "SDK/EARS_Godfather/Modules/NPCScheduling/DemographicRegion.h"
@@ -336,8 +337,8 @@ void HOOK_SetCursorPos(int x, int y)
 
 #if ENABLE_GF2_SPAWN_ENTITY_HOOKS
 uint64_t SimManager_GetAttributePacket_Old;
-typedef void* (__thiscall* SimManager_GetAttributePacket)(void*, EARS::Common::guid128_t&, int);
-void* __fastcall HOOK_SimManager_GetAttributePacket(void* pThis, void* ecx, EARS::Common::guid128_t& InGuid, int InMask)
+typedef void* (__thiscall* SimManager_GetAttributePacket)(EARS::Framework::SimManager*, EARS::Common::guid128_t&, int);
+void* __fastcall HOOK_SimManager_GetAttributePacket(EARS::Framework::SimManager* pThis, void* ecx, EARS::Common::guid128_t& InGuid, int InMask)
 {
 	SimManager_GetAttributePacket funcCast = (SimManager_GetAttributePacket)SimManager_GetAttributePacket_Old;
 	auto value = funcCast(pThis, InGuid, InMask);
@@ -345,20 +346,11 @@ void* __fastcall HOOK_SimManager_GetAttributePacket(void* pThis, void* ecx, EARS
 }
 
 uint64_t SimManager_SpawnEntity_Old;
-typedef void* (__thiscall* SimManager_SpawnEntity)(void*, void*, int, bool);
-void* __fastcall HOOK_SimManager_SpawnEntity(void* pThis, void* ecx, void* Packet, int a2, bool a3)
+typedef void* (__thiscall* SimManager_SpawnEntity)(EARS::Framework::SimManager*, RWS::CAttributePacket*, int, bool);
+void* __fastcall HOOK_SimManager_SpawnEntity(EARS::Framework::SimManager* pThis, void* ecx, RWS::CAttributePacket* Packet, int a2, bool a3)
 {
 	SimManager_SpawnEntity funcCast = (SimManager_SpawnEntity)SimManager_SpawnEntity_Old;
 	auto value = funcCast(pThis, Packet, a2, a3);
-	return value;
-}
-
-uint64_t NPCManager_Create_Old;
-typedef void* (__thiscall* NPCManager_Create)(void*, const EARS::Common::guid128_t& InGuid, uint32_t InPriority, void* InOwner, uint32_t InHStream);
-void* __fastcall HOOK_NPCManager_Create(void* pThis, void* ecx, const EARS::Common::guid128_t& InGuid, uint32_t InPriority, void* InOwner, uint32_t InHStream)
-{
-	NPCManager_Create funcCast = (NPCManager_Create)SimManager_GetAttributePacket_Old;
-	auto value = funcCast(pThis, InGuid, InPriority, InOwner, InHStream);
 	return value;
 }
 #endif // ENABLE_GF2_SPAWN_ENTITY_HOOKS
@@ -374,6 +366,7 @@ void __cdecl Hook_OpenLevelServices()
 	//TestLSShader();
 	//TestLSShaderData();
 
+	// PURPOSE: Update corleone family data to consider whether the user wants DLC content
 	if (EARS::Modules::CorleoneFamilyData* FamilyData = EARS::Modules::CorleoneFamilyData::GetInstance())
 	{
 		const Settings& OurSettings = Settings::GetCheckedRef();
@@ -520,10 +513,6 @@ void GF2Hook::Init()
 #if ENABLE_GF2_SPAWN_ENTITY_HOOKS
 	PLH::x86Detour detour175((char*)0x04461C0, (char*)&HOOK_SimManager_GetAttributePacket, &SimManager_GetAttributePacket_Old, dis);
 	detour175.hook();
-
-	// TODO: Disabled because this causes issues
-	//PLH::x86Detour detour177((char*)0x08F0BB0, (char*)&HOOK_NPCManager_Create, &NPCManager_Create_Old, dis);
-	//detour177.hook();
 
 	PLH::x86Detour detour1780((char*)0x0446340, (char*)&HOOK_SimManager_SpawnEntity, &SimManager_SpawnEntity_Old, dis);
 	detour1780.hook();
