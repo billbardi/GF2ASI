@@ -724,7 +724,6 @@ void ImGuiManager::DrawTab_PlayerFamilyTreeSettings()
 						ImGui::TreePop();
 					}
 
-#if DEBUG
 					if (ImGui::TreeNode("Replace Made Man"))
 					{
 						Mod::ObjectEntryList& SimNPCList = ObjMgr.GetSimNPCList();
@@ -746,11 +745,19 @@ void ImGuiManager::DrawTab_PlayerFamilyTreeSettings()
 									FamilyTreeData->RemoveFamilyMember(FoundSlotIndex, true);
 								}
 
+								// by default rely on existing member
+								// TODO: Fetch from the SimNPC
+								uint32_t DesiredSpecialities = InMember.GetSpecialities();
+								if (DesiredSpecialities == 0)
+								{
+									DesiredSpecialities = (uint32_t)EARS::Modules::Specialties::SPECIALITY_ARSONIST;
+								}
+
 								// now replace with the new family member
 								FamilyTreeData->AddFamilyMember(
 									InMember.GetRank(),
 									AsSimNPC,
-									0,  /* specialites */
+									DesiredSpecialities,
 									EARS::Modules::PlayerFamilyTree::FamilyTreeSlot::FAMILYTREE_SLOT_INVALID,
 									nullptr /* weapon guid */);
 							}
@@ -761,7 +768,6 @@ void ImGuiManager::DrawTab_PlayerFamilyTreeSettings()
 
 					ImGui::TreePop();
 				}
-#endif // DEBUG
 
 				CurrentIdx++;
 

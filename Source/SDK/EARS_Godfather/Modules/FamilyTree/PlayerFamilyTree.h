@@ -77,6 +77,7 @@ namespace EARS
 			EARS::Modules::SentientRank GetRank() const { return m_Rank; }
 			EARS::Modules::SimNPC* GetSimNPC() const { return m_SimNPC.GetPtr(); }
 			EARS::Common::guid128_t GetWeaponGUID() const { return m_WeaponGUID; }
+			uint32_t GetSpecialities() const { return m_Specialties; }
 
 		private:
 
