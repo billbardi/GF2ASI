@@ -168,6 +168,16 @@ void ImGuiManager::OpenLevelServices()
 
 void ImGuiManager::CloseLevelServices()
 {
+	// reset any existing state applied to player / ui
+	bPlayerGodModeActive = false;
+	bPlayerVehicleGodModeActive = false;
+	bWantsUISuppressed = false;
+
+	// reset things used by mod menu
+	TargetFamily = nullptr;
+	InventoryAddItem_SelectedName.clear();
+	InventoryAddItem_SelectedGuid = {};
+
 	// remove other events
 	UnlinkMsg(&DefinedEvents::RunningTickEvent);
 	UnlinkMsg(&DefinedEvents::PlayerAsDriverEnterVehicleEvent);

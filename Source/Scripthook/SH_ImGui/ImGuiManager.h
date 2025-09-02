@@ -125,5 +125,6 @@ private:
 	std::string InventoryAddItem_SelectedName;
 	EARS::Common::guid128_t InventoryAddItem_SelectedGuid;
 
+	// TODO: Does this need SafePtr? WeakPtr?
 	EARS::Modules::Family* TargetFamily = nullptr;
 };
