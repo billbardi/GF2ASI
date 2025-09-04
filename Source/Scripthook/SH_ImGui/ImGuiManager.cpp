@@ -517,6 +517,8 @@ void ImGuiManager::DrawTab_FamiliesSettings()
 		{
 			if (ImGui::CollapsingHeader("Strategy Game", ImGuiTreeNodeFlags_DefaultOpen))
 			{
+				ImGui::Text("Compound Venue ID: %u", TargetFamily->GetCompoundVenueID());
+
 				float MinTurnInterval = TargetFamily->GetMinTurnInterval();
 				if (ImGui::InputFloat("Min Turn Interval", &MinTurnInterval))
 				{
@@ -547,7 +549,7 @@ void ImGuiManager::DrawTab_FamiliesSettings()
 			{
 				for (uint32_t i = 0; i < TargetFamily->GetNumMadeMen(); i++)
 				{
-					const EARS::Modules::MadeMan* CurMadeMan = TargetFamily->GetMadeManByIndex(i);
+					EARS::Modules::MadeMan* CurMadeMan = TargetFamily->GetMadeManByIndex(i);
 					const String* Name = CurMadeMan->GetSimNPC()->GetName();
 					if (ImGui::TreeNode(CurMadeMan, "%s", Name->c_str()))
 					{
@@ -555,6 +557,45 @@ void ImGuiManager::DrawTab_FamiliesSettings()
 						ImGui::BulletText("Venue ID: %u", CurMadeMan->GetVenueID());
 						ImGui::BulletText("Rank: %u", CurMadeMan->GetRank());
 						ImGui::BulletText("State Cooldown: %f", CurMadeMan->GetCountdown());
+
+						switch (CurMadeMan->GetState())
+						{
+							case EARS::Modules::MadeManState::MADE_MAN_STATE_IN_HOSPITAL:
+							case EARS::Modules::MadeManState::MADE_MAN_STATE_IN_JAIL:
+							case EARS::Modules::MadeManState::MADE_MAN_STATE_IN_COOLDOWN:
+							{
+								if (ImGui::Button("Reset State"))
+								{
+									CurMadeMan->SendToCompound();
+								}
+								break;
+							}
+							case EARS::Modules::MadeManState::MADE_MAN_STATE_ELIMINATED:
+							{
+								// TODO: Revive?
+								break;
+							}
+							case EARS::Modules::MadeManState::MADE_MAN_STATE_IN_COMBAT:
+							case EARS::Modules::MadeManState::MADE_MAN_STATE_HIDDEN:
+							case EARS::Modules::MadeManState::MADE_MAN_STATE_IN_TRANSIT:
+							{
+								// TODO: Leave as is?
+								break;
+							}
+							case EARS::Modules::MadeManState::MADE_MAN_STATE_IDLE:
+							{
+								if (ImGui::Button("Hospitalize"))
+								{
+									TargetFamily->HospitalizeMadeMan(*CurMadeMan->GetSimNPC());
+								}
+								ImGui::SameLine();
+								if (ImGui::Button("Incarcerate"))
+								{
+									TargetFamily->IncarcerateMadeMan(*CurMadeMan->GetSimNPC());
+								}
+								break;
+							}
+						}
 
 						ImGui::TreePop();
 

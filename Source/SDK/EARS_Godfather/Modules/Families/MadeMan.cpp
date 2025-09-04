@@ -19,12 +19,24 @@ namespace EARS
 
         void MadeMan::SetVenueID(const uint32_t InVenueID)
         {
-            MemUtils::CallClassMethod<void, MadeMan*, uint32_t>(0x0790D30, this, InVenueID);
+            MemUtils::CallClassMethod<void, MadeMan*, uint32_t>(0x08C80D0, this, InVenueID);
         }
 
         void MadeMan::ReleaseFromVenue(MadeManState DesiredState)
         {
             MemUtils::CallClassMethod<void, MadeMan*, MadeManState>(0x08C8A80, this, DesiredState);
+        }
+
+        void MadeMan::SendToCompound()
+        {
+            assert(m_Family && "A Made Man should have a reference to their Family during runtime gameplay");
+
+            const uint32_t CompoundVenueID = m_Family->GetCompoundVenueID();
+            if (m_VenueID != CompoundVenueID && m_State != MADE_MAN_STATE_ELIMINATED)
+            {
+                SetState(MADE_MAN_STATE_IDLE, 0.0f);
+                SetVenueID(CompoundVenueID);
+            }
         }
 
         EARS::Modules::SentientRank EARS::Modules::MadeMan::GetRank() const

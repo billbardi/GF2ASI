@@ -86,9 +86,49 @@ namespace EARS
 			 * Get the Ally ID from a specific index, if available.
 			 * Note that this will cause a crash if Index is beyond current Ally count.
 			 * @param Index - The Index to use when accessing Ally Family array (max 3).
-			 * @return uint32_t The Ally Family ID.
+			 * @return uint32_t - The Ally Family ID.
 			 */
 			uint32_t GetAllyFamilyID(const uint32_t Index) const;
+
+			/**
+			 * Request that all members of this family are fully healed and out of Hospital
+			 * @return bool - Whether or not we have made changes (eg. if any member has their health replenished)
+			 */
+			bool QuickRecovery() const;
+
+			/**
+			 * Request that a specific member of the family is fully recovered (taken out of hospital)
+			 * @return InMadeMan - The Made Man we would like to heal back to 100% health
+			 * @return bool - Whether or not it achieved the desired effect.
+			 */
+			bool QuickRecovery(EARS::Modules::MadeMan& InMadeMan) const;
+
+			/**
+			 * Request that all members of this family are broken out of Jail.
+			 * @return bool - Whether or not we have made changes (eg. if any member has been taken out of Jail)
+			 */
+			bool Jailbreak() const;
+
+			/**
+			 * Request that a specific member of the family is broken out of Jail.
+			 * @return InMadeMan - The Made Man we would like to break out of Jail
+			 * @return bool - Whether or not it achieved the desired effect.
+			 */
+			bool Jailbreak(EARS::Modules::MadeMan& InMadeMan) const;
+
+			/**
+			 * Request that a specific Made Man is hopitalised, using their SimNPC.
+			 * Internally the Family will be used to find their associated Made Man.
+			 * @return InSimNPC - The SimNPC used to find the Made Man to hospitalise
+			 */
+			void HospitalizeMadeMan(EARS::Modules::SimNPC& InSimNPC) const;
+
+			/**
+			 * Request that a specific Made Man is sent to jail, using their SimNPC.
+			 * Internally the Family will be used to find their associated Made Man.
+			 * @return InSimNPC - The SimNPC used to find the Made Man send to jail
+			 */
+			void IncarcerateMadeMan(EARS::Modules::SimNPC& InSimNPC) const;
 			
 			/**
 			 * Get a Made Man from a specific slot in the list
@@ -110,6 +150,7 @@ namespace EARS
 			float GetMinTurnInterval() const { return m_MinTurnInterval; }
 			float GetMaxTurnInterval() const { return m_MaxTurnInterval; }
 			float GetResponseDelay() const { return m_ResponseDelay; }
+			uint32_t GetCompoundVenueID() const { return m_CompoundVenueID; }
 
 			// made men API
 			float GetMadeManHospitalTime() const { return m_HospitalTime; }
@@ -139,6 +180,13 @@ namespace EARS
 				bool m_bIsPlayerInferred = false;
 				Array<EARS::Modules::SimNPC*> m_RespondersToUse;
 			};
+
+			/**
+			 * Find Made Man using SimNPC. Output is the index in Made Man array.
+			 * @param InSimNPC - The NPC we want to find in the Made Man array.
+			 * @return uint32_t - If found, a valid index in the array. If not, -1.
+			 */
+			int32_t FindMadeManIndex(const EARS::Modules::SimNPC& InSimNPC) const;
 
 			EARS::Modules::FamilyCategory m_Category = FamilyCategory::FamilyCategory_REF;				// 0x50
 			uint32_t m_FamilyID = 0;
@@ -194,7 +242,7 @@ namespace EARS
 			float m_CooldownTime = 0.0f;																// 0x1E0 - 0x1E4
 			float m_HangoutTime = 0.0f;																	// 0x1E4 - 0x1E8
 			float m_VenueBombingDelay = 0.0f;															// 0x1E8 - 0x1EC
-			char m_FamilyPadding_8[0x48];
+			char m_FamilyPadding_8[0x44];
 			//RWS::CEventId m_performStingMsg;
 			//RWS::CEventId m_jailbreakMsg;
 			//RWS::CEventId m_quickRecoveryMsg;
@@ -203,7 +251,7 @@ namespace EARS
 			//RWS::CEventId m_eliminateMsg;
 			//RWS::CEventId m_gainedMonopolyMsg;
 			//RWS::CEventId m_lostMonopolyMsg;
-			//unsigned int m_uCompoundVenueID;
+			uint32_t m_CompoundVenueID = 0;																// 0x22C
 			EARS::Modules::MoneyLedger* m_MoneyLedger = nullptr;										// 0x230
 		};
 

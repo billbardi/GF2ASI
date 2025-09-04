@@ -26,11 +26,105 @@ uint32_t EARS::Modules::Family::GetAllyFamilyID(const uint32_t Index) const
 	return m_FamilyAllyID[Index];
 }
 
+bool EARS::Modules::Family::QuickRecovery() const
+{
+	bool bChanged = false;
+	for (EARS::Modules::MadeMan* CurMadeMan : m_MadeMen)
+	{
+		bChanged |= QuickRecovery(*CurMadeMan);
+	}
+
+	return bChanged;
+}
+
+bool EARS::Modules::Family::QuickRecovery(EARS::Modules::MadeMan& InMadeMan) const
+{
+	if (InMadeMan.GetState() == MADE_MAN_STATE_IN_HOSPITAL)
+	{
+		InMadeMan.SetVenueID(0);
+		InMadeMan.SetState(MADE_MAN_STATE_IDLE, 0.0f);
+		return true;
+	}
+
+	return false;
+}
+
+bool EARS::Modules::Family::Jailbreak() const
+{
+	bool bChanged = false;
+	for (EARS::Modules::MadeMan* CurMadeMan : m_MadeMen)
+	{
+		bChanged |= Jailbreak(*CurMadeMan);
+	}
+
+	return bChanged;
+}
+
+bool EARS::Modules::Family::Jailbreak(EARS::Modules::MadeMan& InMadeMan) const
+{
+	if (InMadeMan.GetState() == MADE_MAN_STATE_IN_JAIL)
+	{
+		InMadeMan.SetVenueID(0);
+		InMadeMan.SetState(MADE_MAN_STATE_IDLE, 0.0f);
+		return true;
+	}
+
+	return false;
+}
+
+void EARS::Modules::Family::HospitalizeMadeMan(EARS::Modules::SimNPC& InSimNPC) const
+{
+	const uint32_t MadeManIdx = FindMadeManIndex(InSimNPC);
+	if (MadeManIdx != -1)
+	{
+		EARS::Modules::MadeMan* TargetMadeMan = m_MadeMen[MadeManIdx];
+		if (TargetMadeMan->GetState() != MADE_MAN_STATE_ELIMINATED
+			&& TargetMadeMan->GetState() != MADE_MAN_STATE_IN_HOSPITAL)
+		{
+			TargetMadeMan->ReleaseFromVenue(MADE_MAN_STATE_IDLE);
+
+			const float Cooldown = TargetMadeMan->GetHospitalTime();
+			TargetMadeMan->SetState(MADE_MAN_STATE_IN_HOSPITAL, Cooldown);
+		}
+	}
+}
+
+void EARS::Modules::Family::IncarcerateMadeMan(EARS::Modules::SimNPC& InSimNPC) const
+{
+	// TODO: POSSIBLE BUG - Shouldn't we also check if the Made Man isn't in Jail?
+
+	const uint32_t MadeManIdx = FindMadeManIndex(InSimNPC);
+	if (MadeManIdx != -1)
+	{
+		EARS::Modules::MadeMan* TargetMadeMan = m_MadeMen[MadeManIdx];
+		if (TargetMadeMan->GetState() != MADE_MAN_STATE_ELIMINATED)
+		{
+			TargetMadeMan->ReleaseFromVenue(MADE_MAN_STATE_IDLE);
+
+			const float Cooldown = TargetMadeMan->GetJailTime();
+			TargetMadeMan->SetState(MADE_MAN_STATE_IN_JAIL, Cooldown);
+		}
+	}
+}
+
 EARS::Modules::MadeMan* EARS::Modules::Family::GetMadeManByIndex(const uint32_t Index) const
 {
 	assert(m_MadeMen.Size() > Index && "Expected to be less than number of current size of m_MadeMen!");
 
 	return m_MadeMen[Index];
+}
+
+int32_t EARS::Modules::Family::FindMadeManIndex(const EARS::Modules::SimNPC& InSimNPC) const
+{
+	for (uint32_t Idx = 0; Idx < m_MadeMen.Size(); Idx++)
+	{
+		if (m_MadeMen[Idx]->GetSimNPC() == &InSimNPC)
+		{
+			return Idx;
+		}
+	}
+
+	return -1;
 }
 
 void EARS::Modules::Family::ForEachOmertaTable(const TVisitOmertaEntryFunctor& InFunction)

@@ -40,6 +40,9 @@ namespace EARS
 			/** Request that the Made Man is released from the venue */
 			void ReleaseFromVenue(MadeManState DesiredState);
 
+			/** Request that the MadeMan is sent back to the family compound */
+			void SendToCompound();
+
 			/** Get rank from the SimNPC (not stored on Made Man) */
 			SentientRank GetRank() const;
 
