@@ -18,6 +18,7 @@
 
 #include "SDK/EARS_Common/Guid.h"
 #include "SDK/EARS_Framework/Core/SimManager/SimManager.h"
+#include "SDK/EARS_Framework/Core/StreamManager/StreamManager.h"
 #include "SDK/EARS_Godfather/Modules/PartedAnimated/PartedAnimated.h"
 #include "SDK/EARS_Godfather/Modules/Families/CorleoneData.h"
 #include "SDK/EARS_Godfather/Modules/NPCScheduling/DemographicRegion.h"
@@ -25,6 +26,7 @@
 #include "SDK/EARS_Godfather/Modules/Mobface/MobfaceManager.h"
 #include "SDK/EARS_Godfather/Modules/NPC/NPC.h"
 #include "SDK/EARS_Godfather/Modules/Player/PlayerDebug.h"
+#include "SDK/EARS_Godfather/Modules/Turf/City.h"
 #include <SDK/EARS_RT_LLRender/include/ShaderManager.h>
 
 #include <sol.hpp>
@@ -33,7 +35,7 @@
 #define ENABLE_GF2_MULTIPLAYER 0
 #define ENABLE_GF2_DISPL_BEGINSCENE_HOOK 0
 #define ENABLE_GF2_GODFATHER_SERVICES_TICK_HOOK 0
-#define ENABLE_GF2_SPAWN_ENTITY_HOOKS 1
+#define ENABLE_GF2_SPAWN_ENTITY_HOOKS 0
 
 #if ENABLE_GF2_MULTIPLAYER
 struct ConnectionParams
@@ -349,9 +351,28 @@ uint64_t SimManager_SpawnEntity_Old;
 typedef void* (__thiscall* SimManager_SpawnEntity)(EARS::Framework::SimManager*, RWS::CAttributePacket*, int, bool);
 void* __fastcall HOOK_SimManager_SpawnEntity(EARS::Framework::SimManager* pThis, void* ecx, RWS::CAttributePacket* Packet, int a2, bool a3)
 {
+	EARS::Framework::StreamManager* StreamMgr = EARS::Framework::StreamManager::GetInstance();
+
+	const EARS::Common::guid128_t PacketID = Packet->GetInstanceID();
+	const uint32_t ClassID = Packet->GetIdOfClassToCreate();
+	const uint32_t StreamHdl = Packet->GetStreamHandle();
+
+	EARS::Framework::Stream* Str = StreamMgr->GetStreamFromHandle(StreamHdl);
+	const char* StrFilename = Str->GetFileName();
+
+	tConsole::fPrintf("[%s] -> %u -> %u %u %u %u", StrFilename, PacketID, PacketID.a, PacketID.b, PacketID.c, PacketID.d);
+
 	SimManager_SpawnEntity funcCast = (SimManager_SpawnEntity)SimManager_SpawnEntity_Old;
 	auto value = funcCast(pThis, Packet, a2, a3);
 	return value;
+}
+
+uint64_t City_HandleAttributes_Old;
+typedef void(__thiscall* City_HandleAttributes)(EARS::Modules::City*, RWS::CAttributePacket*);
+void __fastcall HOOK_City_HandleAttributes(EARS::Modules::City* pThis, void* ecx, RWS::CAttributePacket* InAttr)
+{
+	City_HandleAttributes funcCast = (City_HandleAttributes)City_HandleAttributes_Old;
+	funcCast(pThis, InAttr);
 }
 #endif // ENABLE_GF2_SPAWN_ENTITY_HOOKS
 
@@ -432,9 +453,9 @@ void GF2Hook::Init()
 {
 #if DEBUG
 	C_Logger::Create("GF2_Hook.txt");
-#endif // DEBUG
 
 	tConsole::fCreate("GF2SE");
+#endif // DEBUG
 
 	PLH::ZydisDisassembler dis(PLH::Mode::x86);
 
@@ -481,9 +502,6 @@ void GF2Hook::Init()
 	PLH::x86Detour detour102((char*)0x08A19F0, (char*)&HOOK_GodfatherConnectionManager_CTOR, &GodfatherConnectionManager_CTOR_old, dis);
 	detour102.hook();
 
-	//PLH::x86Detour detour155((char*)0x403A30, (char*)&HOOK_StreamManager_Load, &StreamManager_Load_Old, dis);
-	//detour155.hook();
-
 	//PLH::x86Detour detour103((char*)0x0AEA650, (char*)&HOOK_HelloReceived, &HelloReceived_old, dis);
 	//detour103.hook();
 #endif // ENABLE_GF2_MULTIPLAYER
@@ -492,6 +510,9 @@ void GF2Hook::Init()
 	PLH::x86Detour detour102((char*)0x608620, (char*)&HOOK_Displ_BeginScene, &Displ_BeginScene_Old, dis);
 	detour102.hook();
 #endif // ENABLE_GF2_DISPL_BEGINSCENE_HOOK
+
+	PLH::x86Detour detour170((char*)0x0403A50, (char*)&HOOK_StreamManager_Load, &StreamManager_Load_Old, dis);
+	detour170.hook();
 
 	PLH::x86Detour detour155((char*)0x608930, (char*)&HOOK_Displ_EndScene, &Displ_EndScene_Old, dis);
 	detour155.hook();
@@ -516,6 +537,9 @@ void GF2Hook::Init()
 
 	PLH::x86Detour detour1780((char*)0x0446340, (char*)&HOOK_SimManager_SpawnEntity, &SimManager_SpawnEntity_Old, dis);
 	detour1780.hook();
+
+	PLH::x86Detour detour1781((char*)0x8492F0, (char*)&HOOK_City_HandleAttributes, &City_HandleAttributes_Old, dis);
+	detour1781.hook();
 #endif // ENABLE_GF2_SPAWN_ENTITY_HOOKS
 
 	PLH::x86Detour detour178((char*)0x06817C0, (char*)&Hook_OpenLevelServices, &OpenLevelServices_Old, dis);

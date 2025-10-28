@@ -63,7 +63,7 @@ namespace EARS
 
 			// Getters
 			uint32_t GetCityID() const { return m_CityID; }
-			String GetInternalName() const { return m_InternalName; }
+			const char* GetInternalName() const { return m_InternalName.c_str(); }
 
 		private:
 			

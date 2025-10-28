@@ -17,6 +17,7 @@
 
 #define RUN_MASTER_SM_IN_ASI 1
 #define IMPLEMENT_DEBUG_FLY_SM 0
+#define OVERRIDE_LAUNCH_CMD 0
 
 EARS::StateMachineSys::StateMachine* S_PlayerMasterSM_FactoryFn(unsigned int id, EARS::StateMachineSys::StateMachineParams* pSMParams)
 {
@@ -70,6 +71,17 @@ void _cdecl HOOK_PlayerMasterSM_BuildStateMachine()
 	Builder.Destroy();
 }
 
+#if OVERRIDE_LAUNCH_CMD
+// PURPOSE: Ability to extend the games init streams and spawn location
+uint64_t UIFrontend_LaunchGame_Old;
+typedef void (__thiscall* UIFrontend_LaunchGame)(void*, const char*, const char*, bool, const char*);
+void _cdecl HOOK_UIFrontend_LaunchGame(const char* pMaps, const char* pStreams, bool bOnline, const char* pSpawn)
+{
+	static const char* ModifiedStreams = "cuba.str miami.str queens.str manhattan.str";
+	PLH::FnCast(UIFrontend_LaunchGame_Old, &HOOK_UIFrontend_LaunchGame)(pMaps, ModifiedStreams, bOnline, pSpawn);
+}
+#endif // OVERRIDE_LAUNCH_CMD
+
 void Mod::ApplyHooks()
 {
 	PLH::ZydisDisassembler dis(PLH::Mode::x86);
@@ -83,4 +95,9 @@ void Mod::ApplyHooks()
 	PLH::x86Detour detour101((char*)0x07AAA00, (char*)&HOOK_PlayerMasterSM_BuildStateMachine, &HOOK_PlayerMasterSM_BuildStateMachine_Old, dis);
 	detour101.hook();
 #endif // RUN_MASTER_SM_IN_ASI
+
+#if OVERRIDE_LAUNCH_CMD
+	PLH::x86Detour detour105((char*)0x0930E70, (char*)&HOOK_UIFrontend_LaunchGame, &UIFrontend_LaunchGame_Old, dis);
+	detour105.hook();
+#endif // OVERRIDE_LAUNCH_CMD
 }

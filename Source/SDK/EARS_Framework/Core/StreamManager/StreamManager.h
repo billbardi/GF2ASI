@@ -34,6 +34,9 @@ namespace EARS
 			/** get the current status of the stream */
 			EARS::Framework::StreamStatus GetStatus() const { return m_Status; }
 
+			/** return the Stream's filename */
+			const char* GetFileName() const { return m_Filename.c_str(); }
+
 		private:
 
 			String m_Filename;
