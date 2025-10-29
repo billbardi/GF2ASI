@@ -27,5 +27,14 @@ namespace EA
 	{
 		// Get the name of the current state from the Characters info structure
 		const char* Character_GetStateName(const ChrCntl_ChrInfo_s& InCharacter, const uint32_t ID);
+
+		// Get the node of the current state from the Characters info structure
+		const ChrCntl_AnimNode_s* Character_GetStateNode(const ChrCntl_ChrInfo_s& InCharacter, const uint32_t ID);
+
+		// Fetch number of state nodes within a Character
+		uint32_t Character_CountStateNodes(const ChrCntl_ChrInfo_s& InCharacter);
+
+		// Fetch number of state names within a Character
+		uint32_t Character_CountStateNames(const ChrCntl_ChrInfo_s& InCharacter);
 	} // CCT
 } // EA

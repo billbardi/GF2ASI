@@ -194,6 +194,8 @@ namespace EARS
 				return nullptr;
 			}
 
+			uint32_t Size() const { return m_NumEntries; }
+
 		private:
 
 			Entry** m_BinArr = nullptr;

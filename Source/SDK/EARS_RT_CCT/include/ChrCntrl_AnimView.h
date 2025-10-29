@@ -23,6 +23,8 @@ namespace EA
 			 */
 			bool IsPlayingAnim(const uint32_t AnimID) const { return m_RootStateID == AnimID; }
 
+			int ChangeState(EA::CCT::AnimView& InAnimView, const int32_t InStateID);
+
 			// getters
 			const ChrCntl_ChrInfo_s* GetCharacter() const { return m_Character; }
 
