@@ -76,7 +76,7 @@ int __fastcall HOOK_ConnectSocket(void* pThis, void* ecx, void* fa, bool bUseSSL
 {
 	C_Logger::Printf("Fesl::ConnectSocket");
 
-	bUseSSL = false;
+	bUseSSL = true;
 
 	ConnectSocket funcCast = (ConnectSocket)ConnectSocket_old;
 	const int value = funcCast(pThis, fa, bUseSSL);
@@ -132,8 +132,10 @@ int _cdecl HOOK_ProtoAriesConnect(uint32_t a1, const char* a2, uint32_t a3, uint
 {
 	const char* CustomFilter = "gf2.xyz";
 
-	C_Logger::Printf("ProtoAriesConnect [%s -> %s] [%u -> %u]", a2, CustomFilter, a3, 2371851708);
-	auto r = PLH::FnCast(ProtoAriesConnect_old, &HOOK_ProtoAriesConnect)(a1, a2, 2371851708, a4);
+	// localhost -> 2130706433
+
+	C_Logger::Printf("ProtoAriesConnect [%s -> %s] [%u -> %u]", a2, CustomFilter, a3, 2130706433);
+	auto r = PLH::FnCast(ProtoAriesConnect_old, &HOOK_ProtoAriesConnect)(a1, a2, 2130706433, a4);
 	return r;
 }
 

@@ -21,6 +21,8 @@ namespace EARS
 {
 	namespace Modules
 	{
+		// forward declares
+		class BuildingStore;
 		class Sentient;
 		class MadeMan;
 
@@ -211,8 +213,8 @@ namespace EARS
 			uint32_t m_SelectedBuildingTintColor = 0; // RwRGBATag
 			float m_Balance = 0;																		// 0x100 - 0x104
 			char m_FamilyPadding_1[0x4]; //float m_Income = 0; ??
-			Array<void*> m_OwnedRackets; // EARS::Modules::BuildingStore
-			Array<void*> m_OwnedFronts; // EARS::Modules::BuildingStore									// 0x114 - 0x120
+			Array<EARS::Modules::BuildingStore*> m_OwnedRackets;
+			Array<EARS::Modules::BuildingStore*> m_OwnedFronts;											// 0x114 - 0x120
 			//uint32_t m_NumPeakOwnedVenues = 0;
 			//Array<uint32_t> m_CurrentMonopolyUpgrades;
 			char m_FamilyPAdding_2[0x10];
