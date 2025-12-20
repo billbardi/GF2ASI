@@ -4,6 +4,7 @@
 #include "Addons/Hook.h"
 
 // Scripthook
+#include "Scripthook/SH_PlayerMasterSM/PlayerAnimViewSM.h"
 #include "Scripthook/SH_PlayerMasterSM/PlayerMasterSM_Modded.h"
 
 // SDK
@@ -17,6 +18,8 @@
 
 #define RUN_MASTER_SM_IN_ASI 1
 #define IMPLEMENT_DEBUG_FLY_SM 0
+#define IMPLEMENT_ANIM_VIEWER_SM 0
+#define IMPLEMENT_PHOTO_MODE_SM 0
 #define OVERRIDE_LAUNCH_CMD 0
 
 EARS::StateMachineSys::StateMachine* S_PlayerMasterSM_FactoryFn(unsigned int id, EARS::StateMachineSys::StateMachineParams* pSMParams)
@@ -33,7 +36,13 @@ void _cdecl HOOK_BuildStateMachines()
 	PLH::FnCast(HOOK_BuildStateMachines_Old, &HOOK_BuildStateMachines)();
 
 	// register custom StateMachines after game engine versions
+#if IMPLEMENT_DEBUG_FLY_SM
 	EARS::Modules::PlayerDebugFlySM::BuildStateMachine();
+#endif // IMPLEMENT_DEBUG_FLY_SM
+
+#if IMPLEMENT_ANIM_VIEWER_SM
+	SH::PlayerAnimViewSM::BuildStateMachine();
+#endif // IMPLEMENT_ANIM_VIEWER_SM
 }
 
 // PURPOSE: Ability to extend the PlayerMasterSM with our own states, messages and transitions.
@@ -55,6 +64,7 @@ void _cdecl HOOK_PlayerMasterSM_BuildStateMachine()
 	StartState->AddUpdateMessage(0x900);
 
 #if IMPLEMENT_DEBUG_FLY_SM
+
 	// TRANSITIONS TO DEBUG STATE ADDED FOR MOD
 	StartState->AddTransition("debugFly", 0x11);
 	StartState->AddExitMessage(0x31);
@@ -64,6 +74,17 @@ void _cdecl HOOK_PlayerMasterSM_BuildStateMachine()
 	DebugFlyState->AddChild("playerDebugFlyStateTable", false);
 	DebugFlyState->AddTransition("start", 1);
 #endif // IMPLEMENT_DEBUG_FLY_SM
+
+#if IMPLEMENT_ANIM_VIEWER_SM
+	// TRANSITIONS TO DEBUG STATE ADDED FOR MOD
+	StartState->AddTransition("debugAnimView", 0x11);
+
+	// DEBUG STATE ADDED FOR MOD
+	EARS::Framework::SMBuilderState* DebugAnimViewState = Builder.AddState("debugAnimView", -1);
+	DebugAnimViewState->AddChild("playerDebugAnimViewStateTable", false);
+	DebugAnimViewState->AddChild("playerCameraStateTable", false);
+	DebugAnimViewState->AddTransition("start", 2);
+#endif // IMPLEMENT_ANIM_VIEWER_SM
 
 	// TODO: While the scripthook features are defined in derived type, we still want to replace original PlayerMasterSM.
 	Builder.CompileAndRegister(0xB08AE1F6, S_PlayerMasterSM_FactoryFn, "PlayerMasterSM");
@@ -86,10 +107,8 @@ void Mod::ApplyHooks()
 {
 	PLH::ZydisDisassembler dis(PLH::Mode::x86);
 
-#if IMPLEMENT_DEBUG_FLY_SM
 	PLH::x86Detour detour100((char*)0x067DEB0, (char*)&HOOK_BuildStateMachines, &HOOK_BuildStateMachines_Old, dis);
 	detour100.hook();
-#endif // IMPLEMENT_DEBUG_FLY_SM
 
 #if RUN_MASTER_SM_IN_ASI
 	PLH::x86Detour detour101((char*)0x07AAA00, (char*)&HOOK_PlayerMasterSM_BuildStateMachine, &HOOK_PlayerMasterSM_BuildStateMachine_Old, dis);

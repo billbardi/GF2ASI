@@ -2,9 +2,11 @@
 
 #include "Addons/Settings.h"
 
+// Scripthook
+#include "Scripthook/SH_PlayerMasterSM/PlayerDebugOptions_Modded.h"
+
 // SDK
 #include "SDK/EARS_Godfather/Modules/Player/Player.h"
-#include "SDK/EARS_Godfather/Modules/Player/PlayerDebug.h"
 
 #include <Windows.h>
 
@@ -12,7 +14,7 @@ namespace SH
 {
 	PlayerMasterSM_Modded::PlayerMasterSM_Modded(unsigned int id, EARS::StateMachineSys::StateMachineParams* pSMParams)
 		: EARS::Modules::PlayerMasterSM(id, pSMParams)
-		, bIsFlying(false)
+		, CurrentState(EActiveState::Game)
 	{
 	}
 
@@ -39,6 +41,12 @@ namespace SH
 
 	bool PlayerMasterSM_Modded::CheckTransition(uint32_t SimTime, float FrameTime, uint32_t TransID, void* TransData)
 	{
+		if (TransID == 0x11)
+		{
+			const SH::PlayerDebugOptions_Modded& DebugOptions = *SH::PlayerDebugOptions_Modded::GetInstance();
+			return DebugOptions.IsInAnimViewMode();
+		}
+
 		return EARS::Modules::PlayerMasterSM::CheckTransition(SimTime, FrameTime, TransID, TransData);
 	}
 
@@ -51,6 +59,7 @@ namespace SH
 	{
 		const EARS::Modules::PlayerDebugOptions& DebugOptions = *EARS::Modules::PlayerDebugOptions::GetInstance();
 		const bool bWantsFlyMode = DebugOptions.IsInDebugFly();
+		const bool bIsFlying = (CurrentState == EActiveState::FlyMode);
 
 		// check if the state is mismatched
 		if (bIsFlying != bWantsFlyMode)
@@ -61,8 +70,6 @@ namespace SH
 				const EARS::Havok::CharacterProxy::CollisionState NewState = (bWantsFlyMode ? EARS::Havok::CharacterProxy::CollisionState::CS_TRIGGERS_ONLY : EARS::Havok::CharacterProxy::CollisionState::CS_ENABLED);
 				CharProxy.SetCollisionState(NewState);
 			}
-
-			bIsFlying = bWantsFlyMode;
 		}
 
 		// now listen for players inputs
@@ -82,6 +89,19 @@ namespace SH
 					CurPlayer->Translate(RwV3d(0.0f, -0.1f, 0.0f));
 				}
 			}
+		}
+	}
+
+	void PlayerMasterSM_Modded::UpdateAmimViewMode()
+	{
+		const SH::PlayerDebugOptions_Modded& DebugOptions = *SH::PlayerDebugOptions_Modded::GetInstance();
+		const bool bWantsAnimViewMode = DebugOptions.IsInAnimViewMode();
+		const bool bIsInAnimViewMode = (CurrentState == EActiveState::AnimView);
+
+		// check if the state is mismatched
+		if (bIsInAnimViewMode != bWantsAnimViewMode)
+		{
+			//CurrentState = EActiveState::AnimView;
 		}
 	}
 }

@@ -25,9 +25,19 @@ namespace SH
 
 	private:
 
+		enum class EActiveState
+		{
+			Game,
+			FlyMode,
+			AnimView
+		};
+
 		/** not part of game, this is for SDK */
 		void UpdateFlyMode();
 
-		bool bIsFlying = false;
+		/** not part of game, this is for SDK */
+		void UpdateAmimViewMode();
+
+		EActiveState CurrentState = EActiveState::Game;
 	};
 }

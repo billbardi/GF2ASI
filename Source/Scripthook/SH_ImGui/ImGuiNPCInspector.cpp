@@ -2,6 +2,9 @@
 
 #include "addons/ImGui/imgui.h"
 
+// Scripthook
+#include "Scripthook/SH_PlayerMasterSM/PlayerDebugOptions_Modded.h"
+
 // SDK
 #include "SDK/EARS_Godfather/Modules/NPC/NPC.h"
 #include "SDK/EARS_Godfather/Modules/NPCScheduling/SimNPC.h"
@@ -11,6 +14,37 @@
 #include "SDK/EARS_Godfather/Modules/Mobface/MobfaceManager.h"
 #include "SDK/EARS_Godfather/Modules/PartedModel/PartedModelMgr.h"
 #include "SDK/EARS_RT_CCT/include/ChrCntrl_AnimView.h"
+#include "SDK/EARS_RT_CCT/include/ChrCntrl_Character.h"
+
+#include "SDK/EARS_Godfather/Modules/Player/PlayerMasterSM.h"
+
+namespace Private
+{
+	struct AnimComboBoxState
+	{
+		int SelectedState = 0;
+
+		ImGuiTextFilter SearchFilter;
+	};
+
+	static AnimComboBoxState UIState;
+
+	bool DrawNodeInComboBox(int Key, const char* StateName, void* Data)
+	{
+		AnimComboBoxState* State = reinterpret_cast<AnimComboBoxState*>(Data);
+
+		if (State->SearchFilter.PassFilter(StateName))
+		{
+			const bool bIsSelected = (State->SelectedState == Key);
+			if (ImGui::Selectable(StateName, bIsSelected))
+			{
+				State->SelectedState = Key;
+			}
+		}
+
+		return false;
+	}
+}
 
 void ImGuiNPCInspector::Initialise(EARS::Modules::Sentient* InSentient, const bool bInPlayerObject)
 {
@@ -90,13 +124,40 @@ void ImGuiNPCInspector::DrawTab_Animation()
 			ImGui::Text("State Name: %s", ActiveObject->GetCharacterStateName());
 			ImGui::Text("Frames: %f/%f", SentientAnimView->GetFrameNum(), SentientAnimView->GetNumFrames());
 
-			// Doesn't work but used as an example
-			//if (ImGui::Button("Play Animation"))
-			//{
-			//	EARS::Modules::PlayerMasterSM* PlayerSM = LocalPlayer->GetPlayerMasterStateMachine();
-			//	PlayerSM->PlayAnim(0x3FCAD2F5, true, true, false, 1.0f, true);
-			//}
+#if DEBUG
+			if (bIsPlayer)
+			{
+				SH::PlayerDebugOptions_Modded& DebugOptions = *SH::PlayerDebugOptions_Modded::GetInstance();
+				bool bIsInAnimViewMode = DebugOptions.IsInAnimViewMode();
+
+				if (ImGui::Checkbox("Anim View Mode", &bIsInAnimViewMode))
+				{
+					DebugOptions.SetAnimViewMode(bIsInAnimViewMode);
+				}
+
+				if (DebugOptions.IsInAnimViewMode())
+				{
+					const ChrCntl_ChrInfo_s* Char = SentientAnimView->GetCharacter();
+
+					Private::AnimComboBoxState& CacheState = Private::UIState;
+					CacheState.SearchFilter.Draw("Search Animation");
+
+					const char* SelectedAnimName = EA::CCT::Character_GetStateName(*Char, CacheState.SelectedState);
+					if (ImGui::BeginCombo("Animation", SelectedAnimName))
+					{
+						EA::CCT::Character_EnumerateStateNames(*Char, Private::DrawNodeInComboBox, &CacheState);
+						ImGui::EndCombo();
+					}
+
+					if (ImGui::Button("Play Anim"))
+					{
+						EARS::Modules::PlayerMasterSM* PlayerSM = reinterpret_cast<EARS::Modules::PlayerMasterSM*>(ActiveObject->GetRootStateMachine());
+						PlayerSM->PlayAnim(Private::UIState.SelectedState, true, true, false, 1.0f, true);
+					}
+				}
+			}
 		}
+#endif // DEBUG
 
 		ImGui::EndTabItem();
 	}

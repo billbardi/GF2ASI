@@ -36,5 +36,11 @@ namespace EA
 
 		// Fetch number of state names within a Character
 		uint32_t Character_CountStateNames(const ChrCntl_ChrInfo_s& InCharacter);
+
+		typedef bool(__cdecl* TEnumerateNodesCB)(int, const ChrCntl_AnimNode_s&, void*);
+		int32_t Character_EnumerateStateNodes(const ChrCntl_ChrInfo_s& InCharacter, TEnumerateNodesCB Callback, void* InOutData);
+
+		typedef bool(__cdecl* TEnumerateNamesCB)(int, const char*, void*);
+		int32_t Character_EnumerateStateNames(const ChrCntl_ChrInfo_s& InCharacter, TEnumerateNamesCB Callback, void* InOutData);
 	} // CCT
 } // EA

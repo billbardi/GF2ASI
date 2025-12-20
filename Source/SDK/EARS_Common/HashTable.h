@@ -132,6 +132,8 @@ namespace EARS
 		{
 		public:
 
+			using THashTableByValueType = HashTableByValue<TKey, TValue, N, TCompare, THash>;
+
 			struct Entry
 			{
 			public:
@@ -195,6 +197,65 @@ namespace EARS
 			}
 
 			uint32_t Size() const { return m_NumEntries; }
+
+			uint32_t GetNumBins() const { return m_NumBins; }
+
+			struct Iterator
+			{
+			public:
+
+				Iterator(THashTableByValueType* InHashTable)
+					: m_HashTable(InHashTable)
+					, m_NextBin(0)
+					, m_Entry(nullptr)
+				{
+					Reset();
+				}
+
+				void WalkToValidEntry()
+				{
+					if (const THashTableByValueType* CurHashTable = m_HashTable)
+					{
+						while (!m_Entry && m_NextBin < CurHashTable->GetNumBins())
+						{
+							m_Entry = CurHashTable->m_BinArr[m_NextBin++];
+						}
+					}
+				}
+
+				void Reset()
+				{
+					m_NextBin = 0;
+					m_Entry = nullptr;
+
+					WalkToValidEntry();
+				}
+
+				bool IsFinshed() const { return m_Entry == nullptr; }
+
+				TKey GetKey() const { return m_Entry->m_Key; }
+
+				TValue* GetObject() const { return &m_Entry->m_Obj; }
+
+				// operator overloads
+				Iterator& operator++(int a1)
+				{
+					m_Entry = m_Entry->m_Next;
+					WalkToValidEntry();
+					return *this;
+				}
+
+			private:
+
+				THashTableByValueType* m_HashTable = nullptr;
+				uint32_t m_NextBin = 0;
+				Entry* m_Entry = nullptr;
+			};
+
+			Iterator CreateIterator()
+			{
+				return Iterator(this);
+			}
 
 		private:
 

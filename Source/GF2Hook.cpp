@@ -14,6 +14,7 @@
 #include "Scripthook/SH_ImGui/ImGuiManager.h"
 #include "Scripthook/SH_Discord/DiscordManager.h"
 #include "Scripthook/SH_ObjectManager/ObjectManager.h"
+#include "Scripthook/SH_PlayerMasterSM/PlayerDebugOptions_Modded.h"
 #include "Scripthook/HookMods.h"
 
 #include "SDK/EARS_Common/Guid.h"
@@ -25,7 +26,6 @@
 #include "SDK/EARS_Godfather/Modules/Scoring/ScoreKeeper.h"
 #include "SDK/EARS_Godfather/Modules/Mobface/MobfaceManager.h"
 #include "SDK/EARS_Godfather/Modules/NPC/NPC.h"
-#include "SDK/EARS_Godfather/Modules/Player/PlayerDebug.h"
 #include "SDK/EARS_Godfather/Modules/Turf/City.h"
 #include <SDK/EARS_RT_LLRender/include/ShaderManager.h>
 
@@ -383,8 +383,9 @@ void __cdecl Hook_OpenLevelServices()
 {
 	PLH::FnCast(OpenLevelServices_Old, &Hook_OpenLevelServices)();
 
-	// PURPOSE: Implement PlayerDebugOptions from xbox
-	EARS::Modules::PlayerDebugOptions* NewOptions = new EARS::Modules::PlayerDebugOptions();
+	// PURPOSE: Implement PlayerDebugOptions for Scripthook
+	//			This includes original PlayerDebugOptions and Scripthook version.
+	SH::PlayerDebugOptions_Modded* NewOptions = new SH::PlayerDebugOptions_Modded();
 
 	//TestLSShader();
 	//TestLSShaderData();
