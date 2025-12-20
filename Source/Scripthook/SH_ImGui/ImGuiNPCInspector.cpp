@@ -156,8 +156,8 @@ void ImGuiNPCInspector::DrawTab_Animation()
 					}
 				}
 			}
-		}
 #endif // DEBUG
+		}
 
 		ImGui::EndTabItem();
 	}
