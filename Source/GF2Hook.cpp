@@ -429,12 +429,12 @@ void __cdecl Hook_CloseLevelServices()
 	if (DiscordManager* OurDiscordManager = DiscordManager::Get())
 	{
 		OurDiscordManager->CloseLevelServices();
+		DiscordManager::DestroyInstance();
 	}
 
 	if (Mod::ObjectManager* OwnObjectMgr = Mod::ObjectManager::Get())
 	{
-		delete OwnObjectMgr;
-		OwnObjectMgr = nullptr;
+		Mod::ObjectManager::DestroyInstance();
 	}
 
 	if (ImGuiManager* ImGuiMgr = ImGuiManager::Get())

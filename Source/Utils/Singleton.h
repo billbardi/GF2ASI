@@ -49,6 +49,15 @@ namespace SH
 			return *Instance;
 		}
 
+		inline static void DestroyInstance()
+		{
+			if (Instance)
+			{
+				delete Instance;
+				Instance = nullptr;
+			}
+		}
+
 	private:
 
 		inline static T* Instance;
