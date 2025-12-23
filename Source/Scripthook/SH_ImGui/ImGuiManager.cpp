@@ -36,6 +36,7 @@
 #include "SDK/EARS_Godfather/Modules/Vehicles/Behaviours/WhiteboxCar/WhiteboxCar.h"
 #include "SDK/EARS_Godfather/Modules/Vehicles/VehicleDamageComponent.h"
 #include "SDK/EARS_Physics/Characters/CharacterProxy.h"
+#include "SDK/EARS_Locale/LocaleManager.h"
 
 #include "SDK/EARS_RT_LLRender/include/ShaderManager.h"
 
@@ -859,6 +860,25 @@ void ImGuiManager::DrawTab_UIHUDSettings()
 		else
 		{
 			ImGui::Text("City Manager is missing!");
+		}
+
+		if (ImGui::CollapsingHeader("Select Language", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			if (EARS::Locale::LocaleManager* LocaleMgr = EARS::Locale::LocaleManager::GetInstance())
+			{
+				for (uint32_t i = 0; i < LocaleMgr->GetNumLanguages(); i++)
+				{
+					if (LocaleMgr->GetTextLanguageIsUserSelectable(i))
+					{
+						const char* Label = LocaleMgr->GetTextLanguageCode(i);
+						ImGui::Bullet();
+						if (ImGui::Selectable(Label))
+						{
+							LocaleMgr->SetCurrentLanguage(i);
+						}
+					}
+				}
+			}
 		}
 
 		ImGui::EndTabItem();
