@@ -20,7 +20,7 @@ namespace EARS
 			// Set the current language
 			void SetCurrentLanguage(int index);
 
-			// Fetch the instance of the Crime Manager
+			// Fetch the instance of the Locale Manager
 			static LocaleManager* GetInstance();
 		};
 	} // Locale
