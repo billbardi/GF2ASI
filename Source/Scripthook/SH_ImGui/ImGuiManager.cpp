@@ -862,19 +862,32 @@ void ImGuiManager::DrawTab_UIHUDSettings()
 			ImGui::Text("City Manager is missing!");
 		}
 
-		if (ImGui::CollapsingHeader("Select Language", ImGuiTreeNodeFlags_DefaultOpen))
+		if (EARS::Locale::LocaleManager* LocaleMgr = EARS::Locale::LocaleManager::GetInstance())
 		{
-			if (EARS::Locale::LocaleManager* LocaleMgr = EARS::Locale::LocaleManager::GetInstance())
+			if (ImGui::CollapsingHeader("Select Language", ImGuiTreeNodeFlags_DefaultOpen))
 			{
 				for (uint32_t i = 0; i < LocaleMgr->GetNumLanguages(); i++)
 				{
 					if (LocaleMgr->GetTextLanguageIsUserSelectable(i))
 					{
 						const char* Label = LocaleMgr->GetTextLanguageCode(i);
+						const int AudioIndex = LocaleMgr->FindAudioLanguageIndex(Label);
+
 						ImGui::Bullet();
 						if (ImGui::Selectable(Label))
 						{
 							LocaleMgr->SetCurrentLanguage(i);
+						}
+
+						if (AudioIndex != -1)
+						{
+							std::string AudioLabel = std::string(Label) + " (Audio)";
+
+							ImGui::Bullet();
+							if (ImGui::Selectable(AudioLabel.c_str()))
+							{
+								LocaleMgr->SetCurrentAudioLanguage(AudioIndex);
+							}
 						}
 					}
 				}
