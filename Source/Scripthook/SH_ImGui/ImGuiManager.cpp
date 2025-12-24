@@ -881,7 +881,7 @@ void ImGuiManager::DrawTab_UIHUDSettings()
 
 						if (AudioIndex != -1)
 						{
-							std::string AudioLabel = std::string(Label) + " (Audio)";
+							const std::string AudioLabel = std::string(Label) + " (Audio)";
 
 							ImGui::Bullet();
 							if (ImGui::Selectable(AudioLabel.c_str()))
