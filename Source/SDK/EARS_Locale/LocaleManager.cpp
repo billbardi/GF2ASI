@@ -3,6 +3,25 @@
 // Hooks
 #include "Addons/Hook.h"
 
+const std::unordered_map<std::string, std::string> EARS::Locale::LocaleManager::languageMap = {
+	{"en", "English"},
+	{"es", "Spanish"},
+	{"ru", "Russian"},
+	{"cs", "Czech"},
+	{"nl", "Dutch"},
+	{"pl", "Polish"},
+	{"fr", "French"},
+	{"de", "German"}
+};
+
+char* EARS::Locale::LocaleManager::GetLanguageName(const char* code)
+{
+	auto it = languageMap.find(code);
+	const char* resultStr = (it != languageMap.end()) ? it->second.c_str() : "Unknown";
+
+	return const_cast<char*>(resultStr);
+}
+
 int EARS::Locale::LocaleManager::GetNumLanguages()
 {
 	return MemUtils::CallClassMethod<int, EARS::Locale::LocaleManager*>(0x604350, this);

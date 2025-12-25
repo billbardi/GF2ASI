@@ -1,5 +1,9 @@
 #pragma once
 
+// CPP
+#include <string>
+#include <unordered_map>
+
 namespace EARS
 {
 	namespace Locale
@@ -7,6 +11,9 @@ namespace EARS
 		class LocaleManager
 		{
 		public:
+
+			// Get the string of language with the 2-letter code
+			char* GetLanguageName(const char* code);
 
 			// Get the number of languages
 			int GetNumLanguages();
@@ -28,6 +35,10 @@ namespace EARS
 
 			// Fetch the instance of the Locale Manager
 			static LocaleManager* GetInstance();
+
+		private:
+
+			static const std::unordered_map<std::string, std::string> languageMap;
 		};
 	} // Locale
 } // EARS
